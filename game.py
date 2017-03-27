@@ -127,7 +127,7 @@ class Plotter:
         self.current_interactive_graph = 0  # Allow to navigate through the graphs in interactive mode
 
     @staticmethod
-    def get_positions(self, nb_players):
+    def get_positions(nb_players):
         """
         Compute the positions of the players so that they are fixed when visualizing the evolution of the game
         :param nb_players: int, number of players in the game
@@ -138,15 +138,14 @@ class Plotter:
             positions[i] = (math.cos(2 * math.pi * i / nb_players), math.sin(2 * math.pi * i / nb_players))
         return positions
 
-    def get_colors(self, game, nb_players):
+    def get_colors(self, game):
         """
         Compute the colors of the players according to their entity type to be able to easily differentiate them
         :param game: Game, played game
-        :param nb_players: int, number of players in the game
         :return: string of color initials
         """
         colors = ""
-        for i in range(nb_players):
+        for i in range(game.rules.nb_players):
             player = game.players[i]
             if player.type is EntityType.competitive_player:
                 colors += self.color_competitive_player
@@ -156,7 +155,7 @@ class Plotter:
                 colors += self.color_other_entity
         return colors
 
-    def get_labels_size(self, game, round_number, nb_players):
+    def get_graph_labels_sizes(self, game, round_number):
         """
         Compute the labels and sizes of the players according to a given graph state (game + round number)
         :param game: Game, played game
@@ -164,13 +163,13 @@ class Plotter:
         :param round_number: int, time step/round number of the game
         :return: tuple containing a dictionary for the labels and an array for the sizes
         """
-        temp_graph = nx.Graph()
-        temp_graph.add_nodes_from(game.graph.nodes())
-        temp_graph.add_edges_from(game.history[round_number])
+        current_graph = nx.Graph()
+        current_graph.add_nodes_from(game.graph.nodes())
+        current_graph.add_edges_from(game.history[round_number])
 
         labels = {}
-        betweenness = nx.betweenness_centrality(game.graph)
-        for i in range(nb_players):
+        betweenness = nx.betweenness_centrality(current_graph)
+        for i in range(game.rules.nb_players):
             player = game.players[i]
             if player.type is EntityType.competitive_player:
                 labels[i] = game.players[i].name + "\n" + str(round(betweenness[i], self.significant_digits))
@@ -181,7 +180,7 @@ class Plotter:
 
         sizes = [(10 * c + 1) * 150 for c in list(betweenness.values())]
 
-        return labels, sizes
+        return current_graph, labels, sizes
 
     def plot_state(self, game):
         """
@@ -191,36 +190,11 @@ class Plotter:
         :param game: Game, current game object
         :return: void
         """
-        n = game.rules.nb_players
+        positions = self.get_positions(game.rules.nb_players)
+        colors = self.get_colors(game)
+        current_graph, labels, sizes = self.get_graph_labels_sizes(game, len(game.history) - 1)
 
-        positions = {}
-        for i in range(n):
-            positions[i] = (math.cos(2 * math.pi * i / n), math.sin(2 * math.pi * i / n))
-
-        colors = ""
-        for i in range(n):
-            player = game.players[i]
-            if player.type is EntityType.competitive_player:
-                colors += self.color_competitive_player
-            elif player.type is EntityType.non_competitive_player:
-                colors += self.color_non_competitive_player
-            else:
-                colors += self.color_other_entity
-
-        labels = {}
-        betweenness = nx.betweenness_centrality(game.graph)
-        for i in range(n):
-            player = game.players[i]
-            if player.type is EntityType.competitive_player:
-                labels[i] = game.players[i].name + "\n" + str(round(betweenness[i], self.significant_digits))
-            elif player.type is EntityType.non_competitive_player:
-                labels[i] = "" + "\n" + str(round(betweenness[i], self.significant_digits))
-            else:
-                labels[i] = "other_entity"
-
-        sizes = [(10 * c + 1) * 150 for c in list(betweenness.values())]
-
-        nx.draw_networkx(game.graph, positions, labels=labels,
+        nx.draw_networkx(current_graph, positions, labels=labels,
                          node_color=colors, node_size=sizes, alpha=self.node_transparency)
         plt.show()
 
@@ -234,43 +208,14 @@ class Plotter:
         """
         if interactive:
 
-            n = game.rules.nb_players
+            positions = self.get_positions(game.rules.nb_players)
+            colors = self.get_colors(game)
+            graphs = [self.get_graph_labels_sizes(game, round_number) for round_number in range(len(game.history))]
 
-            positions = {}
-            for i in range(n):
-                positions[i] = (math.cos(2 * math.pi * i / n), math.sin(2 * math.pi * i / n))
-
-            colors = ""
-            for i in range(n):
-                player = game.players[i]
-                if player.type == EntityType.competitive_player:
-                    colors += self.color_competitive_player
-                elif player.type == EntityType.non_competitive_player:
-                    colors += self.color_non_competitive_player
-                else:
-                    colors += self.color_other_entity
-
-            graphs = []
-
-            for round_number in range(len(game.history)):
-                temp_graph = nx.Graph()
-                temp_graph.add_nodes_from(game.graph.nodes())
-                temp_graph.add_edges_from(game.history[round_number])
-
-                labels = {}
-                betweenness = nx.betweenness_centrality(temp_graph)
-                for i in range(n):
-                    player = game.players[i]
-                    if player.type is EntityType.competitive_player:
-                        labels[i] = game.players[i].name + "\n" + str(round(betweenness[i], self.significant_digits))
-                    elif player.type is EntityType.non_competitive_player:
-                        labels[i] = "" + "\n" + str(round(betweenness[i], self.significant_digits))
-                    else:
-                        labels[i] = "other_entity"
-
-                sizes = [(10 * c + 1) * 150 for c in list(betweenness.values())]
-
-                graphs.append((temp_graph, labels, sizes))
+            # graphs = []
+            # for round_number in range(len(game.history)):
+            #     current_graph, labels, sizes = self.get_current_graph_labels_sizes(game, round_number)
+            #     graphs.append((current_graph, labels, sizes))
 
             # keyboard event handler
             def key_event(e):
@@ -289,8 +234,7 @@ class Plotter:
 
                 curr_pos = self.current_interactive_graph
                 nx.draw_networkx(graphs[curr_pos][0], positions, labels=graphs[curr_pos][1], node_color=colors,
-                                 node_size=graphs[curr_pos][2],
-                                 alpha=self.node_transparency)
+                                 node_size=graphs[curr_pos][2], alpha=self.node_transparency)
 
                 fig.canvas.draw()
 
@@ -300,8 +244,8 @@ class Plotter:
             ax = fig.add_subplot(111)
             plt.axis([-2, 2, -2, 2])
 
-            nx.draw_networkx(graphs[0][0], positions, labels=graphs[0][1], node_color=colors, node_size=graphs[0][2],
-                             alpha=self.node_transparency)
+            nx.draw_networkx(graphs[0][0], positions, labels=graphs[0][1], node_color=colors,
+                             node_size=graphs[0][2], alpha=self.node_transparency)
 
             plt.show()
 
@@ -309,45 +253,14 @@ class Plotter:
 
             plt.ion()
 
-            n = game.rules.nb_players
-
-            positions = {}
-            for i in range(n):
-                positions[i] = (math.cos(2 * math.pi * i / n), math.sin(2 * math.pi * i / n))
-
-            colors = ""
-            for i in range(n):
-                player = game.players[i]
-                if player.type is EntityType.competitive_player:
-                    colors += self.color_competitive_player
-                elif player.type is EntityType.non_competitive_player:
-                    colors += self.color_non_competitive_player
-                else:
-                    colors += self.color_other_entity
+            positions = self.get_positions(game.rules.nb_players)
+            colors = self.get_colors(game)
 
             for round_number in range(len(game.history)):
-
                 plt.clf()
                 plt.axis([-2, 2, -2, 2])
-
-                temp_graph = nx.Graph()
-                temp_graph.add_nodes_from(game.graph.nodes())
-                temp_graph.add_edges_from(game.history[round_number])
-
-                labels = {}
-                betweenness = nx.betweenness_centrality(temp_graph)
-                for i in range(n):
-                    player = game.players[i]
-                    if player.type is EntityType.competitive_player:
-                        labels[i] = game.players[i].name + "\n" + str(round(betweenness[i], self.significant_digits))
-                    elif player.type is EntityType.non_competitive_player:
-                        labels[i] = "" + "\n" + str(round(betweenness[i], self.significant_digits))
-                    else:
-                        labels[i] = "other_entity"
-
-                sizes = [(10 * c + 1) * 150 for c in list(betweenness.values())]
-
-                nx.draw_networkx(temp_graph, positions, labels=labels, node_color=colors, node_size=sizes,
+                current_graph, labels, sizes = self.get_graph_labels_sizes(game, round_number)
+                nx.draw_networkx(current_graph, positions, labels=labels, node_color=colors, node_size=sizes,
                                  alpha=self.node_transparency)
                 plt.pause(0.05)
 

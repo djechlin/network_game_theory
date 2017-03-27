@@ -140,11 +140,12 @@ game1.initialize_graph()
 game1.play_game()
 
 # print(game1.history[8])
-for key, player in game1.players.items():
-    print(player.type)
+# for key, player in game1.players.items():
+#     print(player.type)
 
 plotter = Plotter()
 plotter.plot_game(game1, interactive=True)
+# plotter.plot_state(game1)
 
 
 # Some tests
