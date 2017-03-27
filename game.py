@@ -126,9 +126,10 @@ class Plotter:
         self.color_other_entity = "g"
         self.current_interactive_graph = 0  # Allow to navigate through the graphs in interactive mode
 
+    @staticmethod
     def get_positions(self, nb_players):
         """
-        Compute the positions of the player so that they are fixed when visualizing the evolution of the game
+        Compute the positions of the players so that they are fixed when visualizing the evolution of the game
         :param nb_players: int, number of players in the game
         :return: dictionary of (x,y) coordinate tuple
         """
@@ -136,6 +137,51 @@ class Plotter:
         for i in range(nb_players):
             positions[i] = (math.cos(2 * math.pi * i / nb_players), math.sin(2 * math.pi * i / nb_players))
         return positions
+
+    def get_colors(self, game, nb_players):
+        """
+        Compute the colors of the players according to their entity type to be able to easily differentiate them
+        :param game: Game, played game
+        :param nb_players: int, number of players in the game
+        :return: string of color initials
+        """
+        colors = ""
+        for i in range(nb_players):
+            player = game.players[i]
+            if player.type is EntityType.competitive_player:
+                colors += self.color_competitive_player
+            elif player.type is EntityType.non_competitive_player:
+                colors += self.color_non_competitive_player
+            else:
+                colors += self.color_other_entity
+        return colors
+
+    def get_labels_size(self, game, round_number, nb_players):
+        """
+        Compute the labels and sizes of the players according to a given graph state (game + round number)
+        :param game: Game, played game
+        :param nb_players: int, number of players in the game
+        :param round_number: int, time step/round number of the game
+        :return: tuple containing a dictionary for the labels and an array for the sizes
+        """
+        temp_graph = nx.Graph()
+        temp_graph.add_nodes_from(game.graph.nodes())
+        temp_graph.add_edges_from(game.history[round_number])
+
+        labels = {}
+        betweenness = nx.betweenness_centrality(game.graph)
+        for i in range(nb_players):
+            player = game.players[i]
+            if player.type is EntityType.competitive_player:
+                labels[i] = game.players[i].name + "\n" + str(round(betweenness[i], self.significant_digits))
+            elif player.type is EntityType.non_competitive_player:
+                labels[i] = "" + "\n" + str(round(betweenness[i], self.significant_digits))
+            else:
+                labels[i] = "other_entity"
+
+        sizes = [(10 * c + 1) * 150 for c in list(betweenness.values())]
+
+        return labels, sizes
 
     def plot_state(self, game):
         """
