@@ -122,12 +122,14 @@ rules.nb_max_step = 20
 game1 = Game()
 game1.rules = rules
 
-player3 = ActivePlayer()
+player3 = Player()
 player3.rules = rules
+player3.type = EntityType.competitive_player
 player3.strategy = greedy
 
-player4 = ActivePlayer()
+player4 = Player()
 player4.rules = rules
+player4.type = EntityType.competitive_player
 player4.strategy = greedy
 
 game1.add_player(player3)
@@ -137,7 +139,9 @@ game1.initialize_graph()
 
 game1.play_game()
 
-print(game1.history[8])
+# print(game1.history[8])
+for key, player in game1.players.items():
+    print(player.type)
 
 plotter = Plotter()
 plotter.plot_game(game1, interactive=True)
