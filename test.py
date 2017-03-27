@@ -71,26 +71,26 @@ def greedy(nb_nodes, node_id, history):
 
     return best_u, best_v
 
-rules = Rules()
-rules.nb_max_step = 20
-
-game1 = Game()
-game1.rules = rules
-
-player3 = ActivePlayer()
-player3.rules = rules
-player3.strategy = greedy
-
-game1.add_player(player3)
-
-game1.initialize_graph()
-
-game1.play_game()
-
-# print(game1.history[11])
-
-plotter = Plotter()
-plotter.plot_game(game1, interactive=True)
+# rules = Rules()
+# rules.nb_max_step = 20
+#
+# game1 = Game()
+# game1.rules = rules
+#
+# player3 = ActivePlayer()
+# player3.rules = rules
+# player3.strategy = greedy
+#
+# game1.add_player(player3)
+#
+# game1.initialize_graph()
+#
+# game1.play_game()
+#
+# # print(game1.history[11])
+#
+# plotter = Plotter()
+# plotter.plot_game(game1, interactive=True)
 
 
 # Some tests
@@ -116,31 +116,31 @@ Third test
 2 actives players, greedy strategy
 """
 
-# rules = Rules()
-# rules.nb_max_step = 20
-#
-# game1 = Game()
-# game1.rules = rules
-#
-# player3 = ActivePlayer()
-# player3.rules = rules
-# player3.strategy = greedy
-#
-# player4 = ActivePlayer()
-# player4.rules = rules
-# player4.strategy = greedy
-#
-# game1.add_player(player3)
-# game1.add_player(player4)
-#
-# game1.initialize_graph()
-#
-# game1.play_game()
-#
-# print(game1.history[8])
-#
-# plotter = Plotter()
-# plotter.plot_game(game1, interactive=True)
+rules = Rules()
+rules.nb_max_step = 20
+
+game1 = Game()
+game1.rules = rules
+
+player3 = ActivePlayer()
+player3.rules = rules
+player3.strategy = greedy
+
+player4 = ActivePlayer()
+player4.rules = rules
+player4.strategy = greedy
+
+game1.add_player(player3)
+game1.add_player(player4)
+
+game1.initialize_graph()
+
+game1.play_game()
+
+print(game1.history[8])
+
+plotter = Plotter()
+plotter.plot_game(game1, interactive=True)
 
 
 # Some tests
