@@ -18,7 +18,7 @@ class EntityType(Enum):
 
 
 class Player:
-    def __init__(self, active=False):
+    def __init__(self):
         self.rules = Rules()
         self._type = EntityType.non_competitive_player
         self.node_id = -1
@@ -37,7 +37,9 @@ class Player:
 
     def get_action(self, nb_nodes, node_id, history):
         """
-        Get the action exercised by the player given the current game state and his strategy
+        Get the action exercised by the player given the current game history by calling his strategy
+        :param nb_nodes: int, number of nodes in the graph
+        :param node_id: int, ID of the current node
         :param history: Dict(List(edges)), history of the game (all the states of the graph up to the present moment).
         One state is a list of edges, the history uses a dictionary where the keys represent the time of the state.
         :return: edge to be modified given the strategy of the player and the current history of the game
@@ -46,7 +48,6 @@ class Player:
         handle the visualization all at once at the end, and includes the current state, thus we could restrict
         ourselves later.)
         """
-        # return self.strategy(history)
         return self.strategy(nb_nodes, node_id, history)
 
 
