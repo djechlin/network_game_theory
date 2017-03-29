@@ -30,47 +30,6 @@ Second test
 One active player (greedy current state strategy)
 """
 
-
-def greedy(nb_nodes, node_id, history):
-    graph = nx.Graph()
-    graph.add_nodes_from(list(range(nb_nodes)))
-    graph.add_edges_from(history[len(history)-1])
-
-    # wont decrease betweenness, better if allowed to play blank move (not doing anything)
-    # best_u, best_v, best_bet = 0, 0, nx.betweenness_centrality(graph)[node_id]
-
-    # start best betweenness at 0 to find the best move (even if it means decreasing the current betweenness)
-    best_u, best_v, best_bet = 0, 0, 0
-
-    for i in range(nb_nodes):
-        for j in range(nb_nodes):
-            # Don't want links from node to same node to interfere
-            if j == i:
-                pass
-            else:
-                if graph.has_edge(i, j):
-                    graph.remove_edge(i, j)
-
-                    new_bet = nx.betweenness_centrality(graph)[node_id]
-                    if new_bet > best_bet:
-                        best_u, best_v, best_bet = i, j, new_bet
-
-                    graph.add_edge(i, j)
-
-                else:
-                    graph.add_edge(i, j)
-
-                    new_bet = nx.betweenness_centrality(graph)[node_id]
-                    if new_bet > best_bet:
-                        best_u, best_v, best_bet = i, j, new_bet
-
-                    graph.remove_edge(i, j)
-
-    while best_u == best_v:
-        best_u, best_v = node_id, randint(0, nb_nodes)
-
-    return best_u, best_v
-
 # rules = Rules()
 # rules.nb_max_step = 20
 #
@@ -125,12 +84,15 @@ game1.rules = rules
 player3 = Player()
 player3.rules = rules
 player3.type = EntityType.competitive_player
-player3.strategy = greedy
+s3 = BuildingStrategy()
+print(s3.get_greedy)
+player3.strategy = s3.get_greedy()
+
 
 player4 = Player()
 player4.rules = rules
 player4.type = EntityType.competitive_player
-player4.strategy = greedy
+player4.strategy = s3.get_random()
 
 game1.add_player(player3)
 game1.add_player(player4)

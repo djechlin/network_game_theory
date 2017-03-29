@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 import math
-from random import randint
+from random import randint, random
 from enum import Enum
 
 
@@ -49,6 +49,64 @@ class Player:
         ourselves later.)
         """
         return self.strategy(nb_nodes, node_id, history)
+
+
+class BuildingStrategy:
+    """
+    The strategies could be defined as static from a pure code point of view but we don't define them this way to
+    ensure that each player instantiate a strategy object so that they don't share the exact same strategy in memory.
+    """
+    def get_inactive(self):
+        def inactive_strategy(nb_nodes, node_id, history):
+            return None
+        return inactive_strategy
+
+    def get_random(self):
+        def random_strategy(nb_nodes, node_id, history):
+            return randint(0, nb_nodes - 1), randint(0, nb_nodes - 1)
+        return random_strategy
+
+    def get_greedy(self):
+        def greedy_strategy(nb_nodes, node_id, history):
+            graph = nx.Graph()
+            graph.add_nodes_from(list(range(nb_nodes)))
+            graph.add_edges_from(history[len(history) - 1])
+
+            # wont decrease betweenness, better if allowed to play blank move (not doing anything)
+            # best_u, best_v, best_bet = 0, 0, nx.betweenness_centrality(graph)[node_id]
+
+            # start best betweenness at 0 to find the best move (even if it means decreasing the current betweenness)
+            best_u, best_v, best_bet = 0, 0, 0
+
+            for i in range(nb_nodes):
+                for j in range(nb_nodes):
+                    # Don't want links from node to same node to interfere
+                    if j == i:
+                        pass
+                    else:
+                        if graph.has_edge(i, j):
+                            graph.remove_edge(i, j)
+
+                            new_bet = nx.betweenness_centrality(graph)[node_id]
+                            if new_bet > best_bet:
+                                best_u, best_v, best_bet = i, j, new_bet
+
+                            graph.add_edge(i, j)
+
+                        else:
+                            graph.add_edge(i, j)
+
+                            new_bet = nx.betweenness_centrality(graph)[node_id]
+                            if new_bet > best_bet:
+                                best_u, best_v, best_bet = i, j, new_bet
+
+                            graph.remove_edge(i, j)
+
+            while best_u == best_v:
+                best_u, best_v = node_id, randint(0, nb_nodes)
+
+            return best_u, best_v
+        return greedy_strategy
 
 
 class Game:
