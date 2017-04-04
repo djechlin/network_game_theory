@@ -159,6 +159,8 @@ class Game:
         self.players = {}
         self.current_step = 0
         self.history = {}
+        self.impossible_edges = []
+        self.imposed_edges = []
 
     def initialize_graph(self):
         """
@@ -200,8 +202,10 @@ class Game:
             if modified_edge is not None:
                 modified_edges.add(modified_edge)
 
-        absent_edges = [edge for edge in modified_edges if not self.graph.has_edge(*edge)]
-        existing_edges = [edge for edge in modified_edges if self.graph.has_edge(*edge)]
+        absent_edges = [edge for edge in modified_edges
+                        if (not self.graph.has_edge(*edge) and edge not in self.impossible_edges)]
+        existing_edges = [edge for edge in modified_edges
+                          if (self.graph.has_edge(*edge) and edge not in self.imposed_edges)]
 
         self.graph.add_edges_from(absent_edges)
         self.graph.remove_edges_from(existing_edges)

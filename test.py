@@ -29,6 +29,8 @@ player2.strategy = strategy_builder.get_greedy_strategy()
 game1.add_player(player1)
 game1.add_player(player2)
 
+game1.impossible_edges = [(player1.node_id, player2.node_id)]
+
 game1.initialize_graph()
 
 game1.play_game()
