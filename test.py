@@ -13,18 +13,18 @@ rules.nb_max_step = 20
 game1 = Game()
 game1.rules = rules
 
-strategy_generator = BuildingStrategy()
+strategy_builder = StrategyBuilder()
 
 player1 = Player()
 player1.rules = rules
 player1.type = EntityType.competitive_player
-player1.strategy = strategy_generator.get_greedy_strategy()
+player1.strategy = strategy_builder.get_greedy_strategy()
 
 
 player2 = Player()
 player2.rules = rules
 player2.type = EntityType.competitive_player
-player2.strategy = strategy_generator.get_greedy_strategy()
+player2.strategy = strategy_builder.get_greedy_strategy()
 
 game1.add_player(player1)
 game1.add_player(player2)
@@ -35,11 +35,13 @@ game1.play_game()
 
 # print(BuildingStrategy.get_random_edge(10, 2))
 
-for key, player in game1.players.items():
-    print(player.type)
-
-for key, state in game1.history.items():
-    print(state)
+# for key, player in game1.players.items():
+#     print(player.type)
+#
+# for key, state in game1.history.items():
+#     print(state)
+#
+# print(len(game1.history[len(game1.history) - 1]) )
 
 plotter = Plotter()
 plotter.plot_game(game1, interactive=True)

@@ -49,7 +49,7 @@ class Player:
         return self.strategy(nb_nodes, node_id, history)
 
 
-class BuildingStrategy:
+class StrategyBuilder:
     """
     The strategies could be defined as static from a pure code point of view but we don't define them this way to
     ensure that each player instantiate a strategy object so that they don't share the exact same strategy in memory.
@@ -109,7 +109,7 @@ class BuildingStrategy:
 
             # if graph is empty, return random egoist
             if len(history[len(history) - 1]) == 0:
-                u, v = self.get_random_egoist_edge(nb_nodes, node_id)
+                return self.get_random_egoist_edge(nb_nodes, node_id)
 
             # build graph related to the current state
             graph = nx.Graph()
