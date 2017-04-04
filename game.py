@@ -186,12 +186,9 @@ class Game:
         else:
             raise Exception("There are already too many players")
 
-    def play_round(self):
+    def get_actions(self):
         """
-        Play one round of the game. For now, if two players are acting on the same edge, the logical OR component
-        is adopted (meaning if two players want to destroy the same edge, it will get destroyed).
-        No notion of edge strength and cumulative nodes strength yet
-        :return: void
+        Returns the actions for each player's embedded strategy
         """
         modified_edges = set()
 
@@ -200,11 +197,30 @@ class Game:
             if modified_edge is not None:
                 modified_edges.add(modified_edge)
 
-        absent_edges = [edge for edge in modified_edges if not self.graph.has_edge(*edge)]
-        existing_edges = [edge for edge in modified_edges if self.graph.has_edge(*edge)]
+        return modified_edges
 
-        self.graph.add_edges_from(absent_edges)
-        self.graph.remove_edges_from(existing_edges)
+    def update_env(self, actions):
+        """
+        Mutates the state of the environment (i.e. the graph) based on the actions performed by the players
+        """
+        for edge in actions:
+            u, v = edge
+            if not self.graph.has_edge(*edge):
+                self.graph.add_edge(u, v)
+            else:
+                self.graph.remove_edge(u, v)
+
+    def play_round(self, actions=False):
+        """
+        Play one round of the game. For now, if two players are acting on the same edge, the logical OR component
+        is adopted (meaning if two players want to destroy the same edge, it will get destroyed).
+        No notion of edge strength and cumulative nodes strength yet
+        :return: void
+        """
+        if not actions:
+            actions = self.get_actions()
+
+        self.update_env(actions)
 
         self.current_step += 1
 

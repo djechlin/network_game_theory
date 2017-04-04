@@ -44,7 +44,7 @@ game1.play_game()
 # print(len(game1.history[len(game1.history) - 1]) )
 
 plotter = Plotter()
-plotter.plot_game(game1, interactive=True)
+plotter.plot_game(game1, interactive=False)
 
 # plotter.plot_state(game1)
 
