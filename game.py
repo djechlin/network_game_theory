@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 import math
-from random import randint, random
+from random import randint, random, shuffle
 from enum import Enum
 
 
@@ -23,8 +23,6 @@ class Player:
         self._type = EntityType.non_competitive_player
         self.node_id = -1
         self.name = "John"
-        # self.strategy = lambda nb_nodes, node_id, history: \
-        #     (randint(0, self.rules.nb_players - 1), randint(0, self.rules.nb_players - 1))
         self.strategy = lambda nb_nodes, node_id, history: None
 
     @property
@@ -56,28 +54,72 @@ class BuildingStrategy:
     The strategies could be defined as static from a pure code point of view but we don't define them this way to
     ensure that each player instantiate a strategy object so that they don't share the exact same strategy in memory.
     """
-    def get_inactive(self):
+    @staticmethod
+    def get_random_egoist_edge(nb_nodes, node_id):
+        """
+        Helper function that returns an edge between node_id and a node chosen uniformly at random in the set of
+        remaining nodes
+        :param nb_nodes: Number of players
+        :param node_id: Id of the node calling the function
+        :return: tuple (node_id, id of another random node)
+        """
+        other_nodes = list(range(nb_nodes))
+        other_nodes.remove(node_id)
+        return node_id, other_nodes[randint(0, nb_nodes - 2)]
+
+    def get_inactive_strategy(self):
+        """
+        Define and return the inactive strategy
+        :return: function that returns None when being called (player won't do anything)
+        """
         def inactive_strategy(nb_nodes, node_id, history):
             return None
         return inactive_strategy
 
-    def get_random(self):
+    def get_random_strategy(self):
+        """
+        Define and return the random strategy
+        :return: function that returns a random action (random edge) knowing that a looping edge (u == v) is not
+        allowed in the game and is therefore replaced by None
+        """
         def random_strategy(nb_nodes, node_id, history):
-            return randint(0, nb_nodes - 1), randint(0, nb_nodes - 1)
+            u, v = randint(0, nb_nodes - 1), randint(0, nb_nodes - 1)
+            if u == v:
+                return None
+            else:
+                return u, v
         return random_strategy
 
-    def get_greedy(self):
+    def get_random_egoist_strategy(self):
+        """
+        Define and return the random egoist strategy (modified edge is random but has the current node as one end)
+        :return: function that returns a random action (random edge) knowing that a looping edge (u == v) is not
+        allowed in the game and is therefore replaced by None
+        """
+        def random_egoist_strategy(nb_nodes, node_id, history):
+            return self.get_random_edge(nb_nodes, node_id)
+        return random_egoist_strategy
+
+    def get_greedy_strategy(self):
+        """
+        Define and return the greedy strategy (myopic, only based on the current state and best current action)
+        :return: function that returns the best myopic ation given the current state
+        """
         def greedy_strategy(nb_nodes, node_id, history):
+
+            # if graph is empty, return random egoist
+            if len(history[len(history) - 1]) == 0:
+                u, v = self.get_random_egoist_edge(nb_nodes, node_id)
+
+            # build graph related to the current state
             graph = nx.Graph()
             graph.add_nodes_from(list(range(nb_nodes)))
             graph.add_edges_from(history[len(history) - 1])
 
-            # wont decrease betweenness, better if allowed to play blank move (not doing anything)
-            # best_u, best_v, best_bet = 0, 0, nx.betweenness_centrality(graph)[node_id]
+            # initialize the best current action
+            best_u, best_v, best_bet = 0, 0, nx.betweenness_centrality(graph)[node_id]
 
-            # start best betweenness at 0 to find the best move (even if it means decreasing the current betweenness)
-            best_u, best_v, best_bet = 0, 0, 0
-
+            # iterate through all possible action (possible edge) and keep track of the best choice
             for i in range(nb_nodes):
                 for j in range(nb_nodes):
                     # Don't want links from node to same node to interfere
@@ -102,10 +144,11 @@ class BuildingStrategy:
 
                             graph.remove_edge(i, j)
 
-            while best_u == best_v:
-                best_u, best_v = node_id, randint(0, nb_nodes)
+            if best_u == best_v:
+                return None
+            else:
+                return best_u, best_v
 
-            return best_u, best_v
         return greedy_strategy
 
 
