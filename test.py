@@ -8,7 +8,7 @@ p1:
 """
 
 rules = Rules()
-rules.nb_max_step = 2
+rules.nb_max_step = 1
 
 game1 = Game()
 game1.rules = rules
@@ -51,7 +51,7 @@ game1.play_game()
 # print(len(game1.history[len(game1.history) - 1]) )
 
 plotter = Plotter()
-plotter.plot_game(game1, interactive=True, time_step=0.01, educational=True)
+# plotter.plot_game(game1, interactive=True, time_step=0.01, educational=True)
 
 # plotter.plot_game(game1, interactive=True, time_step=0.01, educational=True, node_list=[0, 1, 2, 3, 4, 5, 6, 7])
 
