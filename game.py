@@ -159,6 +159,8 @@ class Game:
         self.players = {}
         self.current_step = 0
         self.history = {}
+        self.impossible_edges = []
+        self.imposed_edges = []
 
     def initialize_graph(self):
         """
