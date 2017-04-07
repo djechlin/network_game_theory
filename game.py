@@ -15,6 +15,7 @@ class EntityType(Enum):
     competitive_player = 1
     non_competitive_player = 2
     other_entity = 3
+    human = 4
 
 
 class Player:
@@ -46,6 +47,15 @@ class Player:
         handle the visualization all at once at the end, and includes the current state, thus we could restrict
         ourselves later.)
         """
+        if self.type == EntityType.human:
+            print("Here is the current state of the game (history, interactive command to go through history)")
+            # display graph
+
+            u = int(input("Enter the first node id of the edge you want to modify: "))
+            v = int(input("Enter the second node id of the edge you want to modify: "))
+            print("You decided to build/destroy (use has_edge to choose between create and destroy) the edge (" + str(u) + ", " + str(v) + ")")
+            return u, v
+
         return self.strategy(nb_nodes, node_id, history)
 
 

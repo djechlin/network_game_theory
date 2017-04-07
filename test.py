@@ -8,7 +8,7 @@ p1:
 """
 
 rules = Rules()
-rules.nb_max_step = 20
+rules.nb_max_step = 2
 
 game1 = Game()
 game1.rules = rules
@@ -26,8 +26,15 @@ player2.rules = rules
 player2.type = EntityType.competitive_player
 player2.strategy = strategy_builder.get_greedy_strategy()
 
+
+player3 = Player()
+player3.rules = rules
+player3.type = EntityType.human
+player3.name = "Human"
+
 game1.add_player(player1)
 game1.add_player(player2)
+game1.add_player(player3)
 
 game1.initialize_graph()
 
