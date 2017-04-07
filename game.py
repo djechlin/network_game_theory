@@ -97,7 +97,7 @@ class StrategyBuilder:
         allowed in the game and is therefore replaced by None
         """
         def random_egoist_strategy(nb_nodes, node_id, history):
-            return self.get_random_edge(nb_nodes, node_id)
+            return self.get_random_egoist_edge(nb_nodes, node_id)
         return random_egoist_strategy
 
     def get_greedy_strategy(self):
