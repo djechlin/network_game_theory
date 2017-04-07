@@ -291,9 +291,13 @@ class Plotter:
         for i in range(game.rules.nb_players):
             player = game.players[i]
             if player.type is EntityType.competitive_player:
-                labels[i] = game.players[i].name + "\n" + str(round(betweenness[i], self.significant_digits))
+                labels[i] = "player #" + str(player.node_id) + "\n" +\
+                            player.name + "\n" +\
+                            str(round(betweenness[i], self.significant_digits))
             elif player.type is EntityType.non_competitive_player:
-                labels[i] = "" + "\n" + str(round(betweenness[i], self.significant_digits))
+                labels[i] = "player #" + str(player.node_id) + "\n" +\
+                            "" + "\n" +\
+                            str(round(betweenness[i], self.significant_digits))
             else:
                 labels[i] = "other_entity"
 
