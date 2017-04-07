@@ -273,7 +273,7 @@ class Plotter:
                 colors += self.color_other_entity
         return colors
 
-    def get_graph_labels_sizes(self, game, round_number):
+    def get_graph_labels_sizes(self, game, round_number, node_list=None):
         """
         Compute the labels and sizes of the players according to a given graph state (game + round number)
         :param game: Game, played game
@@ -281,6 +281,7 @@ class Plotter:
         :param round_number: int, time step/round number of the game
         :return: tuple containing a dictionary for the labels and an array for the sizes
         """
+
         current_graph = nx.Graph()
         current_graph.add_nodes_from(game.graph.nodes())
         current_graph.add_edges_from(game.history[round_number])
@@ -298,25 +299,32 @@ class Plotter:
 
         sizes = [(10 * c + 1) * 150 for c in list(betweenness.values())]
 
+        if node_list is not None:
+            current_graph = nx.Graph()
+            current_graph.add_nodes_from(node_list)
+            current_graph.add_edges_from([edge for edge in game.history[round_number]
+                                          if (edge[0] in node_list and edge[1] in node_list)])
+
         return current_graph, labels, sizes
 
-    def plot_state(self, game):
+    def plot_state(self, game, node_list=None):
         """
         Plot the current state of a game. Extensive use of NetworkX library, main method used is draw_networkx() and it
         is given various parameters like positions, labels, colors, sizes. The majority of the code here only computes
         those values.
         :param game: Game, current game object
+        :param node_list: [int], List of nodes to be plotted
         :return: void
         """
         positions = self.get_positions(game.rules.nb_players)
         colors = self.get_colors(game)
-        current_graph, labels, sizes = self.get_graph_labels_sizes(game, len(game.history) - 1)
+        current_graph, labels, sizes = self.get_graph_labels_sizes(game, len(game.history) - 1, node_list)
 
         nx.draw_networkx(current_graph, positions, labels=labels,
                          node_color=colors, node_size=sizes, alpha=self.node_transparency)
         plt.show()
 
-    def plot_game(self, game, interactive=False):
+    def plot_game(self, game, interactive=False, node_list=None):
         """
         Plot a whole game.
         :param game: Game, current game object
@@ -328,12 +336,8 @@ class Plotter:
 
             positions = self.get_positions(game.rules.nb_players)
             colors = self.get_colors(game)
-            graphs = [self.get_graph_labels_sizes(game, round_number) for round_number in range(len(game.history))]
-
-            # graphs = []
-            # for round_number in range(len(game.history)):
-            #     current_graph, labels, sizes = self.get_current_graph_labels_sizes(game, round_number)
-            #     graphs.append((current_graph, labels, sizes))
+            graphs = [self.get_graph_labels_sizes(game, round_number, node_list)
+                      for round_number in range(len(game.history))]
 
             # keyboard event handler
             def key_event(e):
@@ -377,7 +381,7 @@ class Plotter:
             for round_number in range(len(game.history)):
                 plt.clf()
                 plt.axis([-2, 2, -2, 2])
-                current_graph, labels, sizes = self.get_graph_labels_sizes(game, round_number)
+                current_graph, labels, sizes = self.get_graph_labels_sizes(game, round_number, node_list)
                 nx.draw_networkx(current_graph, positions, labels=labels, node_color=colors, node_size=sizes,
                                  alpha=self.node_transparency)
                 plt.pause(0.05)

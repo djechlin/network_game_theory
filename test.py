@@ -44,9 +44,9 @@ game1.play_game()
 # print(len(game1.history[len(game1.history) - 1]) )
 
 plotter = Plotter()
-plotter.plot_game(game1, interactive=False)
+# plotter.plot_game(game1, interactive=True, node_list=[0, 1, 2, 3, 4, 5, 6, 7])
 
-# plotter.plot_state(game1)
+plotter.plot_state(game1, node_list=[0, 1, 2, 3, 4, 5, 6, 7])
 
 
 # Some tests
