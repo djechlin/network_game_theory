@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 import math
-from random import randint, random, shuffle
+from random import randint
 from enum import Enum
 
 
@@ -67,7 +67,8 @@ class StrategyBuilder:
         other_nodes.remove(node_id)
         return node_id, other_nodes[randint(0, nb_nodes - 2)]
 
-    def get_inactive_strategy(self):
+    @staticmethod
+    def get_inactive_strategy():
         """
         Define and return the inactive strategy
         :return: function that returns None when being called (player won't do anything)
@@ -76,7 +77,8 @@ class StrategyBuilder:
             return None
         return inactive_strategy
 
-    def get_random_strategy(self):
+    @staticmethod
+    def get_random_strategy():
         """
         Define and return the random strategy
         :return: function that returns a random action (random edge) knowing that a looping edge (u == v) is not
@@ -97,13 +99,13 @@ class StrategyBuilder:
         allowed in the game and is therefore replaced by None
         """
         def random_egoist_strategy(nb_nodes, node_id, history):
-            return self.get_random_edge(nb_nodes, node_id)
+            return self.get_random_egoist_edge(nb_nodes, node_id)
         return random_egoist_strategy
 
     def get_greedy_strategy(self):
         """
         Define and return the greedy strategy (myopic, only based on the current state and best current action)
-        :return: function that returns the best myopic ation given the current state
+        :return: function that returns the best myopic action given the current state
         """
         def greedy_strategy(nb_nodes, node_id, history):
 
@@ -277,8 +279,8 @@ class Plotter:
         """
         Compute the labels and sizes of the players according to a given graph state (game + round number)
         :param game: Game, played game
-        :param nb_players: int, number of players in the game
         :param round_number: int, time step/round number of the game
+        :param node_list: [int], nodes to be plotted
         :return: tuple containing a dictionary for the labels and an array for the sizes
         """
 
@@ -309,6 +311,8 @@ class Plotter:
             current_graph.add_edges_from([edge for edge in game.history[round_number]
                                           if (edge[0] in node_list and edge[1] in node_list)])
 
+            labels = {key: value for (key, value) in labels.items() if key in node_list}
+
         return current_graph, labels, sizes
 
     def plot_state(self, game, node_list=None):
@@ -328,12 +332,14 @@ class Plotter:
                          node_color=colors, node_size=sizes, alpha=self.node_transparency)
         plt.show()
 
-    def plot_game(self, game, interactive=False, node_list=None):
+    def plot_game(self, game, interactive=False, time_step=0.05, node_list=None):
         """
         Plot a whole game.
         :param game: Game, current game object
         :param interactive: Boolean, if false plot the history of the game, if true allow the user to navigate through
         the state
+        :param time_step: int, time step for the non interactive mode
+        :param node_list: [int], node to be plotted
         :return: void
         """
         if interactive:
@@ -388,7 +394,7 @@ class Plotter:
                 current_graph, labels, sizes = self.get_graph_labels_sizes(game, round_number, node_list)
                 nx.draw_networkx(current_graph, positions, labels=labels, node_color=colors, node_size=sizes,
                                  alpha=self.node_transparency)
-                plt.pause(0.05)
+                plt.pause(time_step)
 
             while True:
                 plt.pause(0.05)
