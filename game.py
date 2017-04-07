@@ -49,6 +49,7 @@ class Player:
             print("Here is the current state of the game (history, interactive command to go through history)")
             plotter = Plotter()
             plotter.plot_state(game, block=False)
+            # plotter.plot_game(game, block=False, interactive=True)
             u = int(input("Enter the first node id of the edge you want to modify: "))
             v = int(input("Enter the second node id of the edge you want to modify: "))
             print("You decided to build/destroy (use has_edge to choose between create and destroy) the edge (" + str(u) + ", " + str(v) + ")")
@@ -350,7 +351,7 @@ class Plotter:
                          node_color=colors, node_size=sizes, alpha=self.node_transparency)
         plt.show(block=block)
 
-    def plot_game(self, game, interactive=False, time_step=0.05, educational=False, node_list=None):
+    def plot_game(self, game, interactive=False, time_step=0.05, node_list=None):
         """
         Plot a whole game.
         :param game: Game, current game object
