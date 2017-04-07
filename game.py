@@ -245,6 +245,7 @@ class Plotter:
         self.color_non_competitive_player = "b"
         self.color_other_entity = "g"
         self.current_interactive_graph = 0  # Allow to navigate through the graphs in interactive mode
+        self.labels_interactive_graph = False  # Allow to display the labels in interactive mode
 
     @staticmethod
     def get_positions(nb_players):
@@ -303,7 +304,7 @@ class Plotter:
             else:
                 labels[i] = "other_entity"
 
-        sizes = [(10 * c + 1) * 150 for c in list(betweenness.values())]
+        sizes = [(10 * c + 1) * 300 for c in list(betweenness.values())]
 
         if node_list is not None:
             current_graph = nx.Graph()
@@ -332,7 +333,7 @@ class Plotter:
                          node_color=colors, node_size=sizes, alpha=self.node_transparency)
         plt.show()
 
-    def plot_game(self, game, interactive=False, time_step=0.05, node_list=None):
+    def plot_game(self, game, interactive=False, time_step=0.05, educational=False, node_list=None):
         """
         Plot a whole game.
         :param game: Game, current game object
@@ -356,6 +357,10 @@ class Plotter:
                     self.current_interactive_graph += 1
                 elif e.key == "left":
                     self.current_interactive_graph -= 1
+                elif e.key == "up":
+                    self.labels_interactive_graph = True
+                elif e.key == "down":
+                    self.labels_interactive_graph = False
                 else:
                     return
                 self.current_interactive_graph %= len(graphs)
@@ -365,8 +370,12 @@ class Plotter:
                 plt.axis([-2, 2, -2, 2])
 
                 curr_pos = self.current_interactive_graph
-                nx.draw_networkx(graphs[curr_pos][0], positions, labels=graphs[curr_pos][1], node_color=colors,
-                                 node_size=graphs[curr_pos][2], alpha=self.node_transparency)
+
+                if self.labels_interactive_graph:
+                    nx.draw_networkx(graphs[curr_pos][0], positions, labels=graphs[curr_pos][1], node_color=colors,
+                                     node_size=graphs[curr_pos][2], alpha=self.node_transparency)
+                else:
+                    nx.draw_networkx(graphs[curr_pos][0], positions, node_color=colors, alpha=self.node_transparency)
 
                 fig.canvas.draw()
 
@@ -376,8 +385,11 @@ class Plotter:
             ax = fig.add_subplot(111)
             plt.axis([-2, 2, -2, 2])
 
-            nx.draw_networkx(graphs[0][0], positions, labels=graphs[0][1], node_color=colors,
-                             node_size=graphs[0][2], alpha=self.node_transparency)
+            if self.labels_interactive_graph:
+                nx.draw_networkx(graphs[0][0], positions, labels=graphs[0][1], node_color=colors,
+                                 node_size=graphs[0][2], alpha=self.node_transparency)
+            else:
+                nx.draw_networkx(graphs[0][0], positions, node_color=colors, alpha=self.node_transparency)
 
             plt.show()
 
