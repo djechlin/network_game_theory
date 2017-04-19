@@ -27,7 +27,7 @@ player2.type = EntityType.competitive_player
 player2.strategy = strategy_builder.get_greedy_strategy()
 
 game1.add_player(player1)
-game1.add_player(player2)
+# game1.add_player(player2)
 
 game1.impossible_edges = [(player1.node_id, player2.node_id)]
 
@@ -46,7 +46,7 @@ game1.play_game()
 # print(len(game1.history[len(game1.history) - 1]) )
 
 plotter = Plotter()
-plotter.plot_game(game1, interactive=True, time_step=0.01, educational=True)
+plotter.plot_game(game1, interactive=False, time_step=0.01, educational=True)
 
 # plotter.plot_game(game1, interactive=True, time_step=0.01, educational=True, node_list=[0, 1, 2, 3, 4, 5, 6, 7])
 

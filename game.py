@@ -3,7 +3,7 @@ import networkx as nx
 import math
 from random import randint
 from enum import Enum
-
+import itertools
 
 class Rules:
     def __init__(self):
@@ -121,30 +121,28 @@ class StrategyBuilder:
             # initialize the best current action
             best_u, best_v, best_bet = 0, 0, nx.betweenness_centrality(graph)[node_id]
 
+            # create the possibilities
+            possibilities = list(itertools.combinations(range(nb_nodes), r=2))
+
             # iterate through all possible action (possible edge) and keep track of the best choice
-            for i in range(nb_nodes):
-                for j in range(nb_nodes):
-                    # Don't want links from node to same node to interfere
-                    if j == i:
-                        pass
+            for i, j in possibilities:
+                    if graph.has_edge(i, j):
+                        graph.remove_edge(i, j)
+
+                        new_bet = nx.betweenness_centrality(graph)[node_id]
+                        if new_bet > best_bet:
+                            best_u, best_v, best_bet = i, j, new_bet
+
+                        graph.add_edge(i, j)
+
                     else:
-                        if graph.has_edge(i, j):
-                            graph.remove_edge(i, j)
+                        graph.add_edge(i, j)
 
-                            new_bet = nx.betweenness_centrality(graph)[node_id]
-                            if new_bet > best_bet:
-                                best_u, best_v, best_bet = i, j, new_bet
+                        new_bet = nx.betweenness_centrality(graph)[node_id]
+                        if new_bet > best_bet:
+                            best_u, best_v, best_bet = i, j, new_bet
 
-                            graph.add_edge(i, j)
-
-                        else:
-                            graph.add_edge(i, j)
-
-                            new_bet = nx.betweenness_centrality(graph)[node_id]
-                            if new_bet > best_bet:
-                                best_u, best_v, best_bet = i, j, new_bet
-
-                            graph.remove_edge(i, j)
+                        graph.remove_edge(i, j)
 
             if best_u == best_v:
                 return None
