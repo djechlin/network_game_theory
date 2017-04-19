@@ -8,12 +8,20 @@ p1:
 """
 
 rules = Rules()
-rules.nb_max_step = 20
+rules.nb_max_step = 50
+rules.nb_players = 10
 
 game1 = Game()
 game1.rules = rules
 
 strategy_builder = StrategyBuilder()
+
+def build_greedy_player():
+    player = Player()
+    player.rules = rules
+    player.type = EntityType.competitive_player
+    player.strategy = strategy_builder.get_greedy_strategy()
+    return player
 
 player1 = Player()
 player1.rules = rules
@@ -26,8 +34,25 @@ player2.rules = rules
 player2.type = EntityType.competitive_player
 player2.strategy = strategy_builder.get_greedy_strategy()
 
+player3  = build_greedy_player()
+player4 = build_greedy_player()
+player5 = build_greedy_player()
+player6 = build_greedy_player()
+player7 = build_greedy_player()
+player8 = build_greedy_player()
+player9 = build_greedy_player()
+player10 = build_greedy_player()
+
 game1.add_player(player1)
 game1.add_player(player2)
+game1.add_player(player3)
+game1.add_player(player4)
+game1.add_player(player5)
+game1.add_player(player6)
+game1.add_player(player7)
+game1.add_player(player8)
+game1.add_player(player9)
+game1.add_player(player10)
 
 game1.initialize_graph()
 
