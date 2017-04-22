@@ -59,10 +59,10 @@ with tf.Session() as sess:
     sess.run(init)
     for i in range(num_episodes):
         #Reset environment and get first new observation
-        if i % 10 == 0:
+        if i % 1 == 0:
             print("Episode {}".format(i))
         rules = Rules()
-        rules.nb_max_step = 100
+        rules.nb_max_step = 20
         rules.nb_players = 10
         game1 = Game()
         game1.rules = rules
@@ -78,7 +78,7 @@ with tf.Session() as sess:
         player2.name = "Heuristic"
         player2.type = EntityType.competitive_player
         strategy_builder = StrategyBuilder()
-        player2.strategy = strategy_builder.get_random_egoist_strategy()
+        player2.strategy = strategy_builder.get_approx_greedy_strategy(EPSILON=.3, DELTA=.3)
         game1.add_player(player2)
         
         game1.initialize_graph()

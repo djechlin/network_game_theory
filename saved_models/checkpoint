@@ -1,0 +1,2 @@
+model_checkpoint_path: "greedy_model_exp.ckpt"
+all_model_checkpoint_paths: "greedy_model_exp.ckpt"

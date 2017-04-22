@@ -61,7 +61,7 @@ init = tf.global_variables_initializer()
 # Set learning parameters
 y = .99
 e = 0.1
-num_episodes = 1000
+num_episodes = 100
 #create lists to contain total rewards and steps per episode
 jList = []
 rList = []
@@ -89,7 +89,7 @@ with tf.Session() as sess:
         player2.name = "Heuristic"
         player2.type = EntityType.competitive_player
         strategy_builder = StrategyBuilder()
-        player2.strategy = strategy_builder.get_greedy_strategy()
+        player2.strategy = strategy_builder.get_inactive_strategy()
         game1.add_player(player2)
         
         game1.initialize_graph()
