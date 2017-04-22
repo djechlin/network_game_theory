@@ -1,5 +1,6 @@
 import numpy as np
 import networkx as nx
+import random
 
 def getVertexDiameter(G):
     """
@@ -19,6 +20,8 @@ def getSampleSize(VD, eps=.05, delta=.05, c=.5):
     By default, this returns sample size needed for 5% error with at least 95% probability
     """
     r = None
+    if VD <= 2:
+        VD = 3
     while r is None:
         try:
             r = (c / eps**2) * (np.floor(np.log2(VD - 2)) + np.log(1/delta))
