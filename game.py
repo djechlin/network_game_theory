@@ -5,6 +5,8 @@ from random import randint, random, shuffle
 from enum import Enum
 import itertools
 from approximate_betweenness import approximate_betweenness_centrality
+import pickle
+
 
 class Rules:
     def __init__(self):
@@ -277,6 +279,22 @@ class Game:
         while self.current_step < self.rules.nb_max_step:
             self.play_round()
 
+    def save(self, filename="history.pickle"):
+        # http://stackoverflow.com/questions/11218477/how-can-i-use-pickle-to-save-a-dict
+        game_state = {
+        "rules": self.rules,
+        "history": self.history,
+        "current_step": self.current_step
+        }
+        with open(filename, 'wb') as handle:
+            pickle.dump(game_state, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def load(self, filename):
+        with open(filename, 'rb') as handle:
+            game_state = pickle.load(handle)
+            self.rules = game_state["rules"]
+            self.history = game_state["history"]
+            self.current_step = game_state["current_step"]
 
 class Plotter:
     def __init__(self):
