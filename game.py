@@ -15,6 +15,7 @@ class EntityType(Enum):
     competitive_player = 1
     non_competitive_player = 2
     other_entity = 3
+    human = 4
 
 
 class Player:
@@ -33,20 +34,31 @@ class Player:
     def type(self, value):
         self._type = value
 
-    def get_action(self, nb_nodes, node_id, history):
+    def get_action(self, game, node_id):
         """
         Get the action exercised by the player given the current game history by calling his strategy
-        :param nb_nodes: int, number of nodes in the graph
+        :param game: Game, current game
         :param node_id: int, ID of the current node
-        :param history: Dict(List(edges)), history of the game (all the states of the graph up to the present moment).
-        One state is a list of edges, the history uses a dictionary where the keys represent the time of the state.
         :return: edge to be modified given the strategy of the player and the current history of the game
         (wanted to only consider the current state of the game first but the teacher rightfully indicated that players
         would generally remember the previous states. Anyway, keeping track of the history is more general, allow to
         handle the visualization all at once at the end, and includes the current state, thus we could restrict
         ourselves later.)
         """
-        return self.strategy(nb_nodes, node_id, history)
+        if self.type == EntityType.human:
+            print("Here is the current state of the game (history, interactive command to go through history)")
+            plotter = Plotter()
+            plotter.plot_state(game, block=False)
+            # plotter.plot_game(game, block=False, interactive=True)
+            u = int(input("Enter the first node id of the edge you want to modify: "))
+            v = int(input("Enter the second node id of the edge you want to modify: "))
+            print("You decided to build/destroy (use has_edge to choose between create and destroy) the edge (" + str(u) + ", " + str(v) + ")")
+
+            plt.close("all")
+
+            return u, v
+
+        return self.strategy(game.rules.nb_players, node_id, game.history)
 
 
 class StrategyBuilder:
@@ -195,7 +207,7 @@ class Game:
         modified_edges = set()
 
         for node_id, player in self.players.items():
-            modified_edge = player.get_action(self.rules.nb_players, player.node_id, self.history)
+            modified_edge = player.get_action(self, player.node_id)
             if modified_edge is not None:
                 modified_edges.add(modified_edge)
 
@@ -243,7 +255,8 @@ class Plotter:
         self.significant_digits = 4
         self.color_competitive_player = "r"
         self.color_non_competitive_player = "b"
-        self.color_other_entity = "g"
+        self.color_human = "g"
+        self.color_other_entity = "k"
         self.current_interactive_graph = 0  # Allow to navigate through the graphs in interactive mode
         self.labels_interactive_graph = False  # Allow to display the labels in interactive mode
 
@@ -272,6 +285,8 @@ class Plotter:
                 colors += self.color_competitive_player
             elif player.type is EntityType.non_competitive_player:
                 colors += self.color_non_competitive_player
+            elif player.type is EntityType.human:
+                colors += self.color_human
             else:
                 colors += self.color_other_entity
         return colors
@@ -293,7 +308,7 @@ class Plotter:
         betweenness = nx.betweenness_centrality(current_graph)
         for i in range(game.rules.nb_players):
             player = game.players[i]
-            if player.type is EntityType.competitive_player:
+            if player.type is EntityType.competitive_player or player.type is EntityType.human:
                 labels[i] = "player #" + str(player.node_id) + "\n" +\
                             player.name + "\n" +\
                             str(round(betweenness[i], self.significant_digits))
@@ -316,24 +331,27 @@ class Plotter:
 
         return current_graph, labels, sizes
 
-    def plot_state(self, game, node_list=None):
+    def plot_state(self, game, node_list=None, block=True):
         """
         Plot the current state of a game. Extensive use of NetworkX library, main method used is draw_networkx() and it
         is given various parameters like positions, labels, colors, sizes. The majority of the code here only computes
         those values.
         :param game: Game, current game object
         :param node_list: [int], List of nodes to be plotted
+        :param block: boolean, graph stop or not computations
         :return: void
         """
         positions = self.get_positions(game.rules.nb_players)
         colors = self.get_colors(game)
         current_graph, labels, sizes = self.get_graph_labels_sizes(game, len(game.history) - 1, node_list)
 
+        plt.axis([-2, 2, -2, 2])
+
         nx.draw_networkx(current_graph, positions, labels=labels,
                          node_color=colors, node_size=sizes, alpha=self.node_transparency)
-        plt.show()
+        plt.show(block=block)
 
-    def plot_game(self, game, interactive=False, time_step=0.05, educational=False, node_list=None):
+    def plot_game(self, game, interactive=False, time_step=0.05, node_list=None):
         """
         Plot a whole game.
         :param game: Game, current game object
