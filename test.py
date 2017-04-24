@@ -34,6 +34,7 @@ player3.name = "Human"
 
 game1.impossible_edges = [(player1.node_id, player2.node_id)]
 
+
 game1.add_player(player1)
 game1.add_player(player2)
 game1.add_player(player3)
@@ -41,6 +42,11 @@ game1.add_player(player3)
 game1.initialize_graph()
 
 game1.play_game()
+
+print(nx.betweenness_centrality(game1.graph))
+
+inverse = [(value, key) for key, value in nx.betweenness_centrality(game1.graph).items()]
+print(sorted(inverse, reverse=True))
 
 # print(BuildingStrategy.get_random_edge(10, 2))
 

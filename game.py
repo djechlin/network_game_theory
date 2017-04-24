@@ -114,6 +114,31 @@ class StrategyBuilder:
             return self.get_random_egoist_edge(nb_nodes, node_id)
         return random_egoist_strategy
 
+    def get_follower_strategy(self):
+        """
+        Define and return the follower strategy whereby the player connects to best players or does nothing
+        when connected to everyone
+        :return: function computing the edge of the follower strategy
+        """
+        def follower_strategy(nb_nodes, node_id, history):
+
+            # build graph related to the current state
+            graph = nx.Graph()
+            graph.add_nodes_from(list(range(nb_nodes)))
+            graph.add_edges_from(history[len(history) - 1])
+
+            # find the best players and order them in decreasing order
+            inverse = [(value, key) for key, value in nx.betweenness_centrality(graph).items()]
+            sorted(inverse, reverse=True)
+
+            for i in range(len(inverse)):
+                if not graph.has_edge(node_id, inverse[i][1]):
+                    return node_id, inverse[i][1]
+
+            return None
+
+        return follower_strategy
+
     def get_greedy_strategy(self):
         """
         Define and return the greedy strategy (myopic, only based on the current state and best current action)
