@@ -3,6 +3,7 @@ from .entity import EntityType
 import networkx as nx
 
 import math
+import itertools
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -19,6 +20,7 @@ class Plotter:
         self.color_other_entity = "k"
         self.current_interactive_graph = 0  # Allow to navigate through the graphs in interactive mode
         self.labels_interactive_graph = False  # Allow to display the labels in interactive mode
+        self.leader_board_size = 3
 
     @staticmethod
     def get_positions(nb_players):
@@ -106,12 +108,17 @@ class Plotter:
         current_graph, labels, sizes = self.get_graph_labels_sizes(game, len(game.history) - 1, node_list)
 
         plt.axis([-2, 2, -2, 2])
+        plt.axis('off')
 
         nx.draw_networkx(current_graph, positions, labels=labels,
                          node_color=colors, node_size=sizes, alpha=self.node_transparency)
+
+        plt.text(2, 2, 'boxed italics text in data coords', style='italic',
+                bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+
         plt.show(block=block)
 
-    def plot_game(self, game, interactive=False, time_step=0.05, node_list=None):
+    def plot_game(self, game, interactive=False, time_step=0.05, node_list=None, leader_board=False):
         """
         Plot a whole game.
         :param game: Game, current game object
@@ -143,11 +150,20 @@ class Plotter:
                     return
                 self.current_interactive_graph %= len(graphs)
 
+                curr_pos = self.current_interactive_graph
+
                 ax.cla()
 
-                plt.axis([-2, 2, -2, 2])
+                if leader_board:
+                    plt.axis([-1.5, 2, -2, 2])
+                    plt.axis('off')
+                    plt.text(1.5, 2,
+                             _get_leader_board(game, curr_pos, self.leader_board_size, self.significant_digits)
+                             )
 
-                curr_pos = self.current_interactive_graph
+                else:
+                    plt.axis([-2, 2, -2, 2])
+                    plt.axis('off')
 
                 if self.labels_interactive_graph:
                     nx.draw_networkx(graphs[curr_pos][0], positions, labels=graphs[curr_pos][1], node_color=colors,
@@ -161,7 +177,17 @@ class Plotter:
 
             fig.canvas.mpl_connect('key_press_event', key_event)
             ax = fig.add_subplot(111)
-            plt.axis([-2, 2, -2, 2])
+
+            if leader_board:
+                plt.axis([-1.5, 2, -2, 2])
+                plt.axis('off')
+                plt.text(1.5, 2,
+                         _get_leader_board(game, 0, self.leader_board_size, self.significant_digits)
+                         )
+
+            else:
+                plt.axis([-2, 2, -2, 2])
+                plt.axis('off')
 
             if self.labels_interactive_graph:
                 nx.draw_networkx(graphs[0][0], positions, labels=graphs[0][1], node_color=colors,
@@ -180,7 +206,18 @@ class Plotter:
 
             for round_number in range(len(game.history)):
                 plt.clf()
-                plt.axis([-2, 2, -2, 2])
+
+                if leader_board:
+                    plt.axis([-1.5, 2, -2, 2])
+                    plt.axis('off')
+                    plt.text(1.5, 2,
+                             _get_leader_board(game, round_number, self.leader_board_size, self.significant_digits)
+                             )
+
+                else:
+                    plt.axis([-2, 2, -2, 2])
+                    plt.axis('off')
+
                 current_graph, labels, sizes = self.get_graph_labels_sizes(game, round_number, node_list)
                 nx.draw_networkx(current_graph, positions, labels=labels, node_color=colors, node_size=sizes,
                                  alpha=self.node_transparency)
@@ -188,3 +225,20 @@ class Plotter:
 
             while True:
                 plt.pause(0.05)
+
+
+def _get_leader_board(game, round_number, leader_board_size, significant_digits):
+    g = nx.Graph()
+    g.add_nodes_from(game.graph.nodes())
+    g.add_edges_from(game.history[round_number])
+
+    inverse_table = [(value, key) for key, value in nx.betweenness_centrality(g).items()]
+    inverse_table = sorted(inverse_table, reverse=True)
+    return "Leader board:\n" + "\n".join(
+        map(
+            lambda x: str(x[0]+1) + ". " +
+                      str(game.players[x[1][1]].name) + ": " +
+                      str(round(x[1][0], significant_digits)),
+            enumerate(inverse_table[:leader_board_size])
+        )
+    )
