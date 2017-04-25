@@ -2,11 +2,24 @@ from random import randint
 import networkx as nx
 import itertools
 
-import sys
-sys.path.insert(1, '..')
-print(sys.path)
+# import sys
+# sys.path.insert(1, '..')
+# print(sys.path)
+
+from enum import Enum
+
+
+class Strategy(Enum):
+    inactive = "inactive"
+    random_egoist = "random egoist"
+    random = "random"
+    follower = "follower"
+    greedy = "greedy"
+    greedy_approx = "greedy approx"
+
 
 from algorithms.approximate_betweenness import approximate_betweenness_centrality
+
 
 class StrategyBuilder:
     """
@@ -95,7 +108,7 @@ class StrategyBuilder:
 
             # if graph is empty, return random egoist
             if len(history[len(history) - 1]) == 0:
-                return self.get_random_egoist_edge(nb_nodes, node_id)
+                return self.get_random_egoist_edge(nb_nodes, node_id, history, impossible_edges, imposed_edges)
 
             # build graph related to the current state
             graph = nx.Graph()
