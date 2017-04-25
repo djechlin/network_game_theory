@@ -92,6 +92,7 @@ class Game:
         # http://stackoverflow.com/questions/11218477/how-can-i-use-pickle-to-save-a-dict
         game_state = {
         "rules": self.rules,
+        "players": self.players,
         "history": self.history,
         "current_step": self.current_step
         }
@@ -102,5 +103,6 @@ class Game:
         with open(filename, 'rb') as handle:
             game_state = pickle.load(handle)
             self.rules = game_state["rules"]
+            self.players = game_state["players"]
             self.history = game_state["history"]
             self.current_step = game_state["current_step"]
