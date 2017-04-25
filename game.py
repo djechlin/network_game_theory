@@ -287,7 +287,6 @@ class Game:
         Reset the game
         """
         self.graph = nx.Graph()
-        self.players = {}
         self.current_step = 0
         self.history = {}
         self.initialize_graph()

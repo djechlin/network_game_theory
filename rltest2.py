@@ -77,7 +77,7 @@ with tf.Session() as sess:
         if i % 10 == 0:
             print("Episode {}".format(i))
         rules = Rules()
-        rules.nb_max_step = 100
+        rules.nb_max_step = 20
         rules.nb_players = 10
         game1 = Game()
         game1.rules = rules
@@ -115,19 +115,16 @@ with tf.Session() as sess:
             #Get new state and reward from environment
             action = None
             possible_actions = get_actions(game1)
-            if a[0] is not 0:
-                action = [possible_actions[a[0]]]
-            else:
-                action = None
+            action = [possible_actions[a[0]]]
             actions = list(game1.get_actions())
             action.extend(actions)
             game1.play_round(actions=action)
             s1 = get_game_graph(game1).flatten()
             centralities = nx.betweenness_centrality(game1.graph)
             centrality = centralities[0]
-            if centrality == previous_centrality:
-                r = 0
-            elif centrality > previous_centrality:
+            if centrality > previous_centrality:
+                r = 1
+            elif centrality == 1 and centrality == previous_centrality:
                 r = 1
             else:
                 r = -1

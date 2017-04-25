@@ -24,11 +24,17 @@ def get_game_graph(game):
     return np.float32(nx.adjacency_matrix(game.graph).todense())
 
 
-def get_reward(centralities, previous_centrality):
+def get_centrality_reward(centralities, previous_centrality):
     """
     Returns a reward as a function of the centrality
     """
-    return centralities[0]
+    #return centralities[0]
+    if centralities[0] > previous_centrality:
+        return 1
+    elif centralities[0] == 1 and centralities[0] == previous_centrality:
+        return 1
+    else:
+        return -1
 
 class NetworkEnv(object):
     """The abstract environment class that is used by all agents. This class has the exact
@@ -36,18 +42,20 @@ class NetworkEnv(object):
     OpenAI Gym implementation, this class only defines the abstract methods without any actual
     implementation.
     """
-    def __init__(self, game):
+    def __init__(self, game, reward_func="centrality"):
         game.initialize_graph()
         self.game = game
         self.rules = game.rules
         self.num_players = game.rules.nb_players
         self.reward_range = (-np.inf, np.inf)
+        self.reward_func = reward_func
 
         num_actions = get_action_space(game)
         self.action_space = spaces.Discrete(num_actions)
 
         shape = (self.num_players, self.num_players)
-        self.observation_space = spaces.Box(np.zeros(shape), np.ones(shape))
+        #self.observation_space = spaces.Box(np.zeros(shape), np.ones(shape))
+        self.observation_space = spaces.MultiDiscrete([ [0, 1] for i in range(self.num_players**2)])
 
         # Filled in by _reset()
         self.previous_centrality = 0
@@ -73,14 +81,29 @@ class NetworkEnv(object):
         chosen_action.extend(opponent_actions)
         self.game.play_round(actions=chosen_action)
         state = get_game_graph(self.game).flatten()
-        centralities = nx.betweenness_centrality(self.game.graph)
+
         # collect reward
-        reward = get_reward(centralities, self.previous_centrality)
-        self.previous_centrality = centralities[0]
+        if self.reward_func == "centrality":
+            centralities = nx.betweenness_centrality(self.game.graph)
+            reward = centralities[0]
+        elif self.reward_func == "centrality_improvement":
+            centralities = nx.betweenness_centrality(self.game.graph)
+            reward = get_centrality_reward(centralities, self.previous_centrality)
+            self.previous_centrality = centralities[0]
+        elif self.reward_func == "clustering":
+            clustering = nx.clustering(self.game.graph)
+            reward = clustering[0]
+        elif self.reward_func == "eigenvector_centrality":
+            centralities = nx.eigenvector_centrality_numpy(self.game.graph)
+            reward = centralities[0]
+        elif self.reward_func == "degree_centrality":
+            centralities = nx.degree_centrality(self.game.graph)
+            reward = centralities[0]
+
         self.round += 1
         # check if done
         done = self.check_game_objective()
-        info = {"rl_action": chosen_action[0], "centralities": centralities}
+        info = {"rl_action": chosen_action[0]}
 
         return state, reward, done, info
 
@@ -104,9 +127,9 @@ class NetworkEnv(object):
         self.round_limit = self.game.rules.nb_max_step
         self.state = get_game_graph(self.game).flatten()
         self.done = False
-        return state
+        return self.state
 
-    def render(self, mode='human', close=False):
+    def render(self, mode='static', close=False):
         """Renders the environment.
         The set of supported modes varies per environment. (And some
         environments do not support rendering at all.) 
@@ -116,7 +139,10 @@ class NetworkEnv(object):
             close (bool): Close all open renderings.
         """
         plotter = game.Plotter()
-        plotter.plot_state(self.game)
+        if mode == "static":
+            plotter.plot_state(self.game)
+        elif mode == "dynamic":
+            plotter.plot_game(self.game)
 
     def close(self):
         """Override in your subclass to perform any necessary cleanup.

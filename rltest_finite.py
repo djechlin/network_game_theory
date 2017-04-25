@@ -9,46 +9,36 @@ import matplotlib.pyplot as plt
 import scipy.misc
 import os
 
-from game import *
 from random import randint
 import networkx as nx
 
-rules = Rules()
-rules.nb_max_step = 20
-rules.nb_players = 10
+import tensorflow as tf
+from networkenv import NetworkEnv
+import game
+import utils
 
-game1 = Game()
-game1.rules = rules
+# create some rules for the game
+r = game.Rules()
+r.nb_max_step = 20
+r.nb_players = 5
+# create a game with these rules
+g = game.Game(r)
+p1 = game.Player()
+p1.name = "RL"
+p1.rules = r
+p1.type = game.EntityType.competitive_player
+g.add_player(p1)
 
-player1 = Player()
-player1.rules = rules
-player1.type = EntityType.competitive_player
+greedy_player = utils.create_approx_greedy_player("Heuristic", r)
+g.add_player(greedy_player)
 
-game1.add_player(player1)
-
-game1.initialize_graph()
-
-def get_game_graph(game):
-    return np.float32(nx.adjacency_matrix(game.graph).todense())
-
-def get_actions(game):
-    empty_action = [None]
-    actions = list(itertools.combinations(list(game.players.keys()), 2))
-    # add option to take no action
-    empty_action.extend(actions)
-    return empty_action
-
-def get_action_space(game):
-    actions = get_actions(game)
-    return len(actions)
-
-def get_input_space(game):
-    return game.rules.nb_players**2
+# create an RL environment with with game
+env = NetworkEnv(g)
 
 tf.reset_default_graph()
 #These lines establish the feed-forward part of the network used to choose actions
-action_space = get_action_space(game1)
-input_space = get_input_space(game1)
+action_space = env.action_space.n
+observation_space = env.observation_space.shape
 
 
 class experience_buffer():
@@ -80,11 +70,14 @@ def updateTarget(op_holder,sess):
 class Q_Network():
     def __init__(self):
         #These lines establish the feed-forward part of the network used to choose actions
-        self.inputs = tf.placeholder(shape=[None, input_space],dtype=tf.float32)
+        self.inputs = tf.placeholder(shape=[None, observation_space],dtype=tf.float32)
         self.Temp = tf.placeholder(shape=None,dtype=tf.float32)
         self.keep_per = tf.placeholder(shape=None,dtype=tf.float32)
 
-        hidden = slim.fully_connected(self.inputs,64,activation_fn=tf.nn.relu,biases_initializer=None)
+        hidden = slim.fully_connected(self.inputs, 64,
+            activation_fn=tf.nn.relu,
+            weights_initializer=tf.contrib.layers.xavier_initializer(),
+            biases_initializer=None)
         hidden = slim.dropout(hidden,self.keep_per)
         self.Q_out = slim.fully_connected(hidden,action_space,activation_fn=None,biases_initializer=None)
         
@@ -144,33 +137,11 @@ with tf.Session() as sess:
         #Reset environment and get first new observation
         if i % 10 == 0:
             print("Episode {}".format(i))
-        rules = Rules()
-        rules.nb_max_step = 20
-        rules.nb_players = 10
-        game1 = Game()
-        game1.rules = rules
-        player1 = Player()
-        player1.name = "RL"
-        player1.rules = rules
-        player1.type = EntityType.competitive_player
-        game1.add_player(player1)
-        
-        
-        player2 = Player()
-        player2.rules = rules
-        player2.name = "Heuristic"
-        player2.type = EntityType.competitive_player
-        strategy_builder = StrategyBuilder()
-        player2.strategy = strategy_builder.get_approx_greedy_strategy(EPSILON=.3, DELTA=.3)
-        game1.add_player(player2)
-        
-        game1.initialize_graph()
-        previous_centrality = 0
-        s = get_game_graph(game1).flatten()
+        s = env.reset()
         rAll = 0
         d = False
         j = 0
-        while j < rules.nb_max_step:
+        while j < env.round_limit:
             j+=1
             if exploration == "greedy":
                 #Choose an action with the maximum expected value.
@@ -195,34 +166,9 @@ with tf.Session() as sess:
                 #Choose an action using a sample from a dropout approximation of a bayesian q-network.
                 a,allQ = sess.run([q_net.predict,q_net.Q_out],feed_dict={q_net.inputs:s,q_net.keep_per:(1-e)+0.1})
                 a = a[0]
-            possible_actions = get_actions(game1)
-            action = [possible_actions[a]]
-            actions = list(game1.get_actions())
-            action.extend(actions)
-            game1.play_round(actions=action)
-            s1 = get_game_graph(game1).flatten()
-            centralities = nx.betweenness_centrality(game1.graph)
-            centrality = centralities[0]
-            """
-            if centrality == previous_centrality and previous_centrality < 1.0:
-                r = 0
-            elif centrality > previous_centrality or centrality == 1.0:
-                r = 1
-            else:
-                r = -1
-            """
-            r = centrality
-            """
-            leader = max(list(centralities.values()))
-            if centrality == leader:
-                r = 1
-            else:
-                r = -1
-            """
-            if centrality == 1.0:
-                d = True
-            else:
-                d = False
+
+            s1, r, d, info = env.step(a)
+
             myBuffer.add(np.reshape(np.array([s,a,r,s1,d]),[1,5]))
             
             if e > endE and total_steps > pre_train_steps:
@@ -242,7 +188,6 @@ with tf.Session() as sess:
             rAll += r
             s = s1
             total_steps += 1
-            previous_centrality = centrality
             if d == True:
                 break
         rFinalList.append(r)
@@ -265,5 +210,4 @@ with tf.Session() as sess:
             print("Model saved in file: %s" % save_path)
 print("Mean ending centrality: " + str(sum(rFinalList)/len(rFinalList)) + "%")
 
-plotter = Plotter()
-plotter.plot_game(game1, interactive=False)
+env.render()
