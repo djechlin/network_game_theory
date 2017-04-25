@@ -32,7 +32,11 @@ def get_game_graph(game):
     return np.float32(nx.adjacency_matrix(game.graph).todense())
 
 def get_actions(game):
-    return list(itertools.combinations(list(game.players.keys()), 2))
+    empty_action = [None]
+    actions = list(itertools.combinations(list(game.players.keys()), 2))
+    # add option to take no action
+    empty_action.extend(actions)
+    return empty_action
 
 def get_action_space(game):
     actions = get_actions(game)
@@ -80,8 +84,7 @@ class Q_Network():
         self.Temp = tf.placeholder(shape=None,dtype=tf.float32)
         self.keep_per = tf.placeholder(shape=None,dtype=tf.float32)
 
-        hidden = slim.fully_connected(self.inputs,128,activation_fn=tf.nn.relu,biases_initializer=None)
-        hidden = slim.fully_connected(hidden,64,activation_fn=tf.nn.relu,biases_initializer=None)
+        hidden = slim.fully_connected(self.inputs,64,activation_fn=tf.nn.relu,biases_initializer=None)
         hidden = slim.dropout(hidden,self.keep_per)
         self.Q_out = slim.fully_connected(hidden,action_space,activation_fn=None,biases_initializer=None)
         
@@ -158,7 +161,7 @@ with tf.Session() as sess:
         player2.name = "Heuristic"
         player2.type = EntityType.competitive_player
         strategy_builder = StrategyBuilder()
-        player2.strategy = strategy_builder.get_inactive_strategy()
+        player2.strategy = strategy_builder.get_approx_greedy_strategy(EPSILON=.3, DELTA=.3)
         game1.add_player(player2)
         
         game1.initialize_graph()
@@ -258,7 +261,7 @@ with tf.Session() as sess:
                 print("Mean Reward: " + str(r_mean) + " Total Steps: " + str(total_steps))
             rMeans.append(r_mean)
             jMeans.append(j_mean)
-            save_path = saver.save(sess, "saved_models/solo/model.ckpt")
+            save_path = saver.save(sess, "saved_models/greedy/approx_greedy_model.ckpt")
             print("Model saved in file: %s" % save_path)
 print("Mean ending centrality: " + str(sum(rFinalList)/len(rFinalList)) + "%")
 

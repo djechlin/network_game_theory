@@ -198,8 +198,8 @@ class StrategyBuilder:
 
 
 class Game:
-    def __init__(self):
-        self.rules = Rules()
+    def __init__(self, rules=Rules()):
+        self.rules = rules
         self.graph = nx.Graph()
         self.players = {}
         self.current_step = 0
@@ -249,11 +249,14 @@ class Game:
         Mutates the state of the environment (i.e. the graph) based on the actions performed by the players
         """
         for edge in actions:
-            u, v = edge
-            if not self.graph.has_edge(*edge):
-                self.graph.add_edge(u, v)
-            else:
-                self.graph.remove_edge(u, v)
+            if edge == None:
+                pass
+            else: 
+                u, v = edge
+                if not self.graph.has_edge(*edge):
+                    self.graph.add_edge(u, v)
+                else:
+                    self.graph.remove_edge(u, v)
 
     def play_round(self, actions=False):
         """
@@ -278,6 +281,17 @@ class Game:
         """
         while self.current_step < self.rules.nb_max_step:
             self.play_round()
+
+    def reset(self):
+        """
+        Reset the game
+        """
+        self.graph = nx.Graph()
+        self.players = {}
+        self.current_step = 0
+        self.history = {}
+        self.initialize_graph()
+
 
     def save(self, filename="history.pickle"):
         # http://stackoverflow.com/questions/11218477/how-can-i-use-pickle-to-save-a-dict

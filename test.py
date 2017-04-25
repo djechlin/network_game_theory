@@ -32,7 +32,11 @@ def get_game_graph(game):
     return np.float32(nx.adjacency_matrix(game.graph).todense())
 
 def get_actions(game):
-    return list(itertools.combinations(list(game.players.keys()), 2))
+    empty_action = [None]
+    actions = list(itertools.combinations(list(game.players.keys()), 2))
+    # add option to take no action
+    empty_action.extend(actions)
+    return empty_action
 
 def get_action_space(game):
     actions = get_actions(game)
@@ -80,8 +84,7 @@ class Q_Network():
         self.Temp = tf.placeholder(shape=None,dtype=tf.float32)
         self.keep_per = tf.placeholder(shape=None,dtype=tf.float32)
 
-        hidden = slim.fully_connected(self.inputs,128,activation_fn=tf.nn.relu,biases_initializer=None)
-        hidden = slim.fully_connected(hidden,64,activation_fn=tf.nn.relu,biases_initializer=None)
+        hidden = slim.fully_connected(self.inputs,64,activation_fn=tf.nn.relu,biases_initializer=None)
         hidden = slim.dropout(hidden,self.keep_per)
         self.Q_out = slim.fully_connected(hidden,action_space,activation_fn=None,biases_initializer=None)
         
@@ -101,7 +104,7 @@ class Q_Network():
         self.updateModel = trainer.minimize(loss)
         
 # Set learning parameters
-exploration = "e-greedy" #Exploration method. Choose between: greedy, random, e-greedy, boltzmann, bayesian.
+exploration = "bayesian" #Exploration method. Choose between: greedy, random, e-greedy, boltzmann, bayesian.
 y = .99 #Discount factor.
 num_episodes = 5 #Total number of episodes to train network for.
 tau = 0.001 #Amount to update target network at each step.

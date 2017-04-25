@@ -1,3 +1,4 @@
+import itertools
 import math
 import game
 from gym import spaces
@@ -6,10 +7,11 @@ import networkx as nx
 
 
 def get_actions(game):
+    empty_action = [None]
     actions = list(itertools.combinations(list(game.players.keys()), 2))
     # add option to take no action
-    actions.append(None)
-    return actions
+    empty_action.extend(actions)
+    return empty_action
 
 def get_action_space(game):
     actions = get_actions(game)
@@ -69,7 +71,7 @@ class NetworkEnv(object):
         chosen_action = [possible_actions[action]]
         opponent_actions = list(self.game.get_actions())
         chosen_action.extend(opponent_actions)
-        self.game.play_round(actions=chose_action)
+        self.game.play_round(actions=chosen_action)
         state = get_game_graph(self.game).flatten()
         centralities = nx.betweenness_centrality(self.game.graph)
         # collect reward

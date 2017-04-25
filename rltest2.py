@@ -28,7 +28,11 @@ def get_game_graph(game):
     return np.float32(nx.adjacency_matrix(game.graph).todense())
 
 def get_actions(game):
-    return list(itertools.combinations(list(game.players.keys()), 2))
+    empty_action = [None]
+    actions = list(itertools.combinations(list(game.players.keys()), 2))
+    # add option to take no action
+    empty_action.extend(actions)
+    return empty_action
 
 def get_action_space(game):
     actions = get_actions(game)

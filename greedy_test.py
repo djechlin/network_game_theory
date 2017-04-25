@@ -5,10 +5,11 @@ from game import *
 from random import randint
 import networkx as nx
 import random
+import time
 
 rules = Rules()
-rules.nb_max_step = 2000
-rules.nb_players = 1000
+rules.nb_max_step = 200
+rules.nb_players = 100
 
 game = Game()
 game.rules = rules
@@ -27,7 +28,7 @@ def add_players(game, players):
         game.add_player(game)
     return game
 
-for i in range(50):
+for i in range(10):
     player = create_player("Player {}".format(i), eps=.2, delta=.05)
     print("Created player {}".format(i))
     game.add_player(player)
@@ -38,10 +39,16 @@ game.initialize_graph()
 print("Graph initialized, starting game")
 
 for i in range(rules.nb_max_step):
-    print("Round {}".format(i))
+    time1 = time.time()
+    print("Starting round {}".format(i))
     game.play_round()
+    time2 = time.time()
+    print("Finished round {0} in {1} ms".format(i, (time2-time1)*1000.0))
+    # save periodically
+    if i % 50 == 0:
+        game.save("history/history_100_10active.pickle")
 
-game.save("history/history_1000_50active.pickle")
+game.save("history/history_100_10active.pickle")
 
 plotter = Plotter()
 plotter.plot_game(game, interactive=False)
