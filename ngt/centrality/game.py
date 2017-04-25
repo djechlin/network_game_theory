@@ -3,7 +3,40 @@ from .player import Player
 
 import pickle
 import networkx as nx
+import pandas as pd
 
+
+from enum import Enum
+
+class Metrics(Enum):
+    pass
+    # macro
+    # if round_number is not 0:
+    # print(nx.degree_assortativity_coefficient(graph))
+    # print(nx.transitivity(graph))
+    # print(nx.average_clustering(graph))
+    # print(nx.is_connected(graph))
+    # print(nx.number_connected_components(graph))
+    # print(nx.transitivity(graph))
+    # print(nx.transitivity(graph))
+
+
+
+    # micro
+    # print(nx.average_neighbor_degree(graph))
+    # print(nx.clustering(graph))
+
+    # could be used instead of betweenness centrality
+    # print(nx.degree_centrality(graph))
+    # print(nx.closeness_centrality(graph))
+    # print(nx.communicability_centrality(graph))
+    # print(nx.load_centrality(graph))
+    # print(nx.betweenness_centrality(graph))
+    # print(nx.triangles(graph))
+    # print(nx.square_clustering(graph))
+
+def _get_column_names():
+    return ['Family', 'Betweenness', 'Weighted betweenness']
 
 class Game:
     def __init__(self):
@@ -14,6 +47,7 @@ class Game:
         self.history = {}
         self.impossible_edges = []
         self.imposed_edges = []
+        self.metrics = None
 
     def initialize_graph(self):
         """
@@ -66,7 +100,7 @@ class Game:
             elif self.graph.has_edge(*edge) and edge not in self.imposed_edges:
                 self.graph.remove_edge(u, v)
 
-    def play_round(self, actions=False):
+    def play_round(self, actions=False, metrics=False):
         """
         Play one round of the game. For now, if two players are acting on the same edge, the logical OR component
         is adopted (meaning if two players want to destroy the same edge, it will get destroyed).
@@ -82,13 +116,22 @@ class Game:
 
         self.history[self.current_step] = self.graph.edges()
 
-    def play_game(self):
+        if metrics:
+            self.metrics.loc[len(self.metrics)] = \
+                [1,
+                 2,
+                 3]
+
+    def play_game(self, metrics=False):
         """
         Play the entire game according to the given rules (total number of steps in a game)
         :return: void
         """
+        if metrics:
+            self.metrics = pd.DataFrame(columns=_get_column_names())
+
         while self.current_step < self.rules.nb_max_step:
-            self.play_round()
+            self.play_round(metrics=metrics)
 
     def save(self, filename="history.pickle"):
         # http://stackoverflow.com/questions/11218477/how-can-i-use-pickle-to-save-a-dict

@@ -35,6 +35,14 @@ class StrategyBuilder:
         :param node_id: Id of the node calling the function
         :return: tuple (node_id, id of another random node)
         """
+        # stop = set([i[0] if i[node_id] else i[1] for i in impossible_edges if node_id in i])
+        # other_nodes = set(range(nb_nodes))
+        # other_nodes.remove(node_id)
+        # other_nodes = list(other_nodes - stop)
+        # print(other_nodes)
+        #
+        # return node_id, other_nodes[randint(0, len(other_nodes)-1)]
+
         other_nodes = list(range(nb_nodes))
         other_nodes.remove(node_id)
         return node_id, other_nodes[randint(0, nb_nodes - 2)]
@@ -71,7 +79,7 @@ class StrategyBuilder:
         allowed in the game and is therefore replaced by None
         """
         def random_egoist_strategy(nb_nodes, node_id, history, impossible_edges, imposed_edges):
-            return self.get_random_egoist_edge(nb_nodes, node_id)
+            return self.get_random_egoist_edge(nb_nodes, node_id, history, impossible_edges, imposed_edges)
         return random_egoist_strategy
 
     def get_follower_strategy(self):
@@ -125,24 +133,23 @@ class StrategyBuilder:
 
             # iterate through all possible action (possible edge) and keep track of the best choice
             for i, j in possible_edges:
-                    if graph.has_edge(i, j):
-                        graph.remove_edge(i, j)
+                if graph.has_edge(i, j):
+                    graph.remove_edge(i, j)
 
-                        new_bet = nx.betweenness_centrality(graph)[node_id]
-                        if new_bet > best_bet:
-                            best_u, best_v, best_bet = i, j, new_bet
+                    new_bet = nx.betweenness_centrality(graph)[node_id]
+                    if new_bet > best_bet:
+                        best_u, best_v, best_bet = i, j, new_bet
 
-                        graph.add_edge(i, j)
+                    graph.add_edge(i, j)
 
-                    else:
-                        graph.add_edge(i, j)
+                else:
+                    graph.add_edge(i, j)
 
-                        new_bet = nx.betweenness_centrality(graph)[node_id]
-                        if new_bet > best_bet:
-                            best_u, best_v, best_bet = i, j, new_bet
+                    new_bet = nx.betweenness_centrality(graph)[node_id]
+                    if new_bet > best_bet:
+                        best_u, best_v, best_bet = i, j, new_bet
 
-                        graph.remove_edge(i, j)
-
+                    graph.remove_edge(i, j)
             if best_u == best_v:
                 return None
             else:

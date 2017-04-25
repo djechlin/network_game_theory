@@ -40,34 +40,44 @@ if __name__ == '__main__':
 
     game1.initialize_graph()
 
-    game1.impossible_edges = [(player1.node_id, player2.node_id), (player2.node_id, player1.node_id)]
+    game1.impossible_edges = [
+        (player1.node_id, player2.node_id),
+        (player2.node_id, player1.node_id),
+        # (player1.node_id, 9),
+        # (player2.node_id, 8),
+        # (player2.node_id, 7),
+        # (player2.node_id, 6),
+        # (player2.node_id, 5),
+    ]
 
     """
     Play the game
     """
 
-    game1.play_game()
+    game1.play_game(True)
+
+    print(game1.metrics)
 
     """
     Save the game
     """
 
-    date = datetime.datetime.now()
-    game1.save(filename="games/" + str(date) + ".pkl")
-
-    """
-    Load the game
-    """
-
-    game = Game()
-    game.load('history.pickle')
+    # date = datetime.datetime.now()
+    # game1.save(filename="games/" + str(date) + ".pkl")
+    #
+    # """
+    # Load the game
+    # """
+    #
+    # game = Game()
+    # game.load('history.pickle')
 
     """
     Replay the game
     """
 
     plotter = Plotter()
-    plotter.plot_game(game, interactive=False, leader_board=True, time_step=0.01)
+    plotter.plot_game(game1, interactive=False, leader_board=True, time_step=0.01)
 
     # Interactive mode
     # plotter.plot_game(game1, interactive=True, time_step=0.01, leader_board=True, node_list=[0, 1, 2, 3, 4, 5, 6, 7])

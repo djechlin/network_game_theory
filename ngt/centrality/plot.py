@@ -53,6 +53,13 @@ class Plotter:
                 colors += self.color_other_entity
         return colors
 
+    """
+    Note: Metrics are computed after the game is played
+    This is a trade off, since we could avoid to recompute graphs after the game by
+    directly computing everything in the Game.play_round() method but this would slow
+    down the execution of a game. As is, the code is more modular.
+    """
+
     def get_graph_labels_sizes(self, game, round_number, node_list=None):
         """
         Compute the labels and sizes of the players according to a given graph state (game + round number)
@@ -93,6 +100,28 @@ class Plotter:
             labels = {key: value for (key, value) in labels.items() if key in node_list}
 
         return current_graph, labels, sizes
+
+    """
+    functions to plot evolution of macro measures through time
+    """
+
+
+
+
+    """
+    functions to plot evolution of :X micro measure through time
+    """
+
+    """
+    functions to plot micro measures distribution
+    """
+
+
+
+
+    """
+    plot_state and plot_game to draw network and replay game
+    """
 
     def plot_state(self, game, node_list=None, block=True):
         """
@@ -191,6 +220,33 @@ class Plotter:
                 plt.clf()
 
                 graph = graphs[round_number][0]
+
+                # macro
+                # if round_number is not 0:
+                    # print(nx.degree_assortativity_coefficient(graph))
+                # print(nx.transitivity(graph))
+                # print(nx.average_clustering(graph))
+                # print(nx.is_connected(graph))
+                print(nx.number_connected_components(graph))
+                # print(nx.transitivity(graph))
+                # print(nx.transitivity(graph))
+
+
+
+                # micro
+                # print(nx.average_neighbor_degree(graph))
+                # print(nx.clustering(graph))
+
+                # could be used instead of betweenness centrality
+                # print(nx.degree_centrality(graph))
+                # print(nx.closeness_centrality(graph))
+                # print(nx.communicability_centrality(graph))
+                # print(nx.load_centrality(graph))
+                # print(nx.betweenness_centrality(graph))
+                # print(nx.triangles(graph))
+                # print(nx.square_clustering(graph))
+
+
                 labels = graphs[round_number][1]
                 sizes = graphs[round_number][2]
                 leader_board_str = ''
@@ -239,6 +295,7 @@ def _get_leader_board(game, round_number, leader_board_size, significant_digits)
             enumerate(inverse_table[:leader_board_size])
         )
     )
+
 
 """
 Rewrite draw_networkx to attach mlp canvas and handle user events
