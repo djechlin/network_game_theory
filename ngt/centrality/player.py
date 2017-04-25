@@ -11,7 +11,7 @@ class Player:
         self._type = EntityType.non_competitive_player
         self.node_id = -1
         self.name = "John"
-        self.strategy = lambda nb_nodes, node_id, history: None
+        self.strategy = lambda nb_nodes, node_id, history, impossible_edges, imposed_edges: None
 
     @property
     def type(self):
