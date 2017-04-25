@@ -1,17 +1,54 @@
 from .entity import EntityType
+from .strategy import Strategy
+from .strategy import StrategyBuilder
 from .rules import Rules
 from .plot import Plotter
 
 # remove import matplotlib, shouldn't be here
 import matplotlib.pyplot as plt
 
+
 class Player:
-    def __init__(self):
-        self.rules = Rules()
-        self._type = EntityType.non_competitive_player
-        self.node_id = -1
-        self.name = "John"
-        self.strategy = lambda nb_nodes, node_id, history, impossible_edges, imposed_edges: None
+    def __init__(self, **kwargs):
+        self._rules = kwargs.get('rules', Rules())
+        self._type = kwargs.get('type', EntityType.non_competitive_player)
+        self._node_id = -1
+        self._name = kwargs.get('name', "John")
+        self._strategy_type = kwargs.get('strategy_type', Strategy.inactive)
+        self._strategy = lambda nb_nodes, node_id, history, impossible_edges, imposed_edges: None
+
+        if self._strategy_type is Strategy.random_egoist:
+            strategy_builder = StrategyBuilder()
+            self._strategy = strategy_builder.get_random_egoist_strategy()
+
+        elif self._strategy_type is Strategy.random:
+            strategy_builder = StrategyBuilder()
+            self._strategy = strategy_builder.get_random_strategy()
+
+        elif self._strategy_type is Strategy.follower:
+            strategy_builder = StrategyBuilder()
+            self._strategy = strategy_builder.get_follower_strategy()
+
+        elif self._strategy_type is Strategy.greedy:
+            strategy_builder = StrategyBuilder()
+            self._strategy = strategy_builder.get_greedy_strategy()
+
+        elif self._strategy_type is Strategy.greedy:
+            strategy_builder = StrategyBuilder()
+            self._strategy = strategy_builder.get_approx_greedy_strategy()
+
+    """
+    API ref, contract of what users should call from the outside
+    Mainly allows to change internal attribute names and have more
+    encapsulation.
+    """
+    @property
+    def rules(self):
+        return self._rules
+
+    @rules.setter
+    def rules(self, value):
+        self._rules = value
 
     @property
     def type(self):
@@ -20,6 +57,38 @@ class Player:
     @type.setter
     def type(self, value):
         self._type = value
+
+    @property
+    def node_id(self):
+        return self._node_id
+
+    @node_id.setter
+    def node_id(self, value):
+        self._node_id = value
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @property
+    def strategy_type(self):
+        return self._strategy_type
+
+    @strategy_type.setter
+    def strategy_type(self, value):
+        self._strategy_type = value
+
+    @property
+    def strategy(self):
+        return self._strategy
+
+    @strategy.setter
+    def strategy(self, value):
+        self._strategy = value
 
     def get_action(self, game, node_id):
         """
