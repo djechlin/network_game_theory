@@ -33,7 +33,7 @@ player1.strategy = strategy_builder.get_greedy_strategy()
 player2 = Player()
 player2.rules = rules
 player2.type = EntityType.competitive_player
-player2.strategy = strategy_builder.get_greedy_strategy()
+player2.strategy = strategy_builder.get_approx_greedy_strategy()
 
 
 player3 = Player()
