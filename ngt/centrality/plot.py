@@ -68,6 +68,7 @@ class Plotter:
 
         labels = {}
         betweenness = nx.betweenness_centrality(current_graph)
+
         for i in range(game.rules.nb_players):
             player = game.players[i]
             if player.type is EntityType.competitive_player or player.type is EntityType.human:

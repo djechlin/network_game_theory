@@ -28,14 +28,15 @@ class Game:
             temp_non_competitive_player = Player()
             self.add_player(temp_non_competitive_player)
 
-    def add_player(self, player):
+    def add_player(self, player, node_id=None):
         """
         Add the given player to the list of players and give it a node_id if there is still an available slot
         :param player: Player, player to be added
         :return: void
         """
         if len(self.players) < self.rules.nb_players:
-            node_id = len(self.players)
+            if not node_id:
+                node_id = len(self.players)
             self.players[node_id] = player
             player.node_id = node_id
         else:
@@ -93,7 +94,7 @@ class Game:
         # http://stackoverflow.com/questions/11218477/how-can-i-use-pickle-to-save-a-dict
         game_state = {
         "rules": self.rules,
-        "players": self.players,
+        "players": _to_repr_players(self.players),
         "history": self.history,
         "current_step": self.current_step
         }
@@ -104,6 +105,58 @@ class Game:
         with open(filename, 'rb') as handle:
             game_state = pickle.load(handle)
             self.rules = game_state["rules"]
-            self.players = game_state["players"]
             self.history = game_state["history"]
             self.current_step = game_state["current_step"]
+
+            players = _to_players(game_state["players"])
+            for k, v in players.items():
+                self.add_player(v, k)
+
+            self.initialize_graph()
+
+"""
+Pickle doesn't save local objects (like strategies in this example)
+Helper ReprClass to solve the problem (only dumping the strategy)
+"""
+
+
+def _to_repr_players(players):
+
+    res = {}
+
+    for k, v in players.items():
+
+        player_without_strategy = PlayerRepr(v.rules,
+                                             v.type,
+                                             v.node_id,
+                                             v.name,
+                                             v.strategy_type)
+
+        res[player_without_strategy.node_id] = player_without_strategy
+
+    return res
+
+
+def _to_players(players):
+
+    res = {}
+
+    for k, v in players.items():
+        player_with_strategy = Player(rules=v.rules,
+                                      type=v.type,
+                                      # node_id=v.node_id, # handled by calling add_player in load()
+                                      name=v.name,
+                                      strategy_type=v.strategy_type)
+
+        res[k] = player_with_strategy
+
+    return res
+
+
+class PlayerRepr:
+    def __init__(self, rules, type, node_id, name, strategy_type):
+        self.rules = rules
+        self.type = type
+        self.node_id = node_id
+        self.name = name
+        self.strategy_type = strategy_type

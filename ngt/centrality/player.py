@@ -33,7 +33,7 @@ class Player:
             strategy_builder = StrategyBuilder()
             self._strategy = strategy_builder.get_greedy_strategy()
 
-        elif self._strategy_type is Strategy.greedy:
+        elif self._strategy_type is Strategy.greedy_approx:
             strategy_builder = StrategyBuilder()
             self._strategy = strategy_builder.get_approx_greedy_strategy()
 
@@ -94,6 +94,9 @@ class Player:
     @strategy.setter
     def strategy(self, value):
         self._strategy = value
+
+    def __str__(self):
+        return "_".join([self.name, self.strategy_type.value, str(self._node_id)])
 
     def get_action(self, game, node_id):
         """

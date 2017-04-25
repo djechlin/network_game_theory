@@ -3,6 +3,8 @@ import networkx as nx
 # import sys
 # print(sys.path)
 
+import datetime
+
 from centrality.rules import Rules
 from centrality.strategy import Strategy
 from centrality.player import Player
@@ -11,6 +13,10 @@ from centrality.game import Game
 from centrality.plot import Plotter
 
 if __name__ == '__main__':
+
+    """
+    Create rules and game
+    """
 
     rules = Rules()
     rules.nb_max_step = 10
@@ -36,10 +42,32 @@ if __name__ == '__main__':
 
     game1.impossible_edges = [(player1.node_id, player2.node_id), (player2.node_id, player1.node_id)]
 
+    """
+    Play the game
+    """
+
     game1.play_game()
 
+    """
+    Save the game
+    """
+
+    date = datetime.datetime.now()
+    game1.save(filename="games/" + str(date) + ".pkl")
+
+    """
+    Load the game
+    """
+
+    game = Game()
+    game.load('history.pickle')
+
+    """
+    Replay the game
+    """
+
     plotter = Plotter()
-    plotter.plot_game(game1, interactive=False, leader_board=True, time_step=0.01)
+    plotter.plot_game(game, interactive=False, leader_board=True, time_step=0.01)
 
     # Interactive mode
     # plotter.plot_game(game1, interactive=True, time_step=0.01, leader_board=True, node_list=[0, 1, 2, 3, 4, 5, 6, 7])
