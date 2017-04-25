@@ -46,4 +46,4 @@ class Player:
 
             return u, v
 
-        return self.strategy(game.rules.nb_players, node_id, game.history)
+        return self.strategy(game.rules.nb_players, node_id, game.history, game.impossible_edges, game.imposed_edges)

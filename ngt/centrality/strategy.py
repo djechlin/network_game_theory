@@ -91,7 +91,7 @@ class StrategyBuilder:
         Define and return the greedy strategy (myopic, only based on the current state and best current action)
         :return: function that returns the best myopic action given the current state
         """
-        def greedy_strategy(nb_nodes, node_id, history):
+        def greedy_strategy(nb_nodes, node_id, history, impossible_edges, imposed_edges):
 
             # if graph is empty, return random egoist
             if len(history[len(history) - 1]) == 0:
@@ -105,11 +105,13 @@ class StrategyBuilder:
             # initialize the best current action
             best_u, best_v, best_bet = 0, 0, nx.betweenness_centrality(graph)[node_id]
 
-            # create the possibilities
-            possibilities = list(itertools.combinations(range(nb_nodes), r=2))
+            # create the list of possible edges
+            edges_combination = list(itertools.combinations(range(nb_nodes), r=2))
+            possible_edges = set(edges_combination) - set(impossible_edges)
+            possible_edges = possible_edges - imposed_edges
 
             # iterate through all possible action (possible edge) and keep track of the best choice
-            for i, j in possibilities:
+            for i, j in possible_edges:
                     if graph.has_edge(i, j):
                         graph.remove_edge(i, j)
 
