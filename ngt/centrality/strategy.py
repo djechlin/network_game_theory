@@ -14,7 +14,7 @@ class StrategyBuilder:
     ensure that each player instantiate a strategy object so that they don't share the exact same strategy in memory.
     """
     @staticmethod
-    def get_random_egoist_edge(nb_nodes, node_id):
+    def get_random_egoist_edge(nb_nodes, node_id, history, impossible_edges, imposed_edges):
         """
         Helper function that returns an edge between node_id and a node chosen uniformly at random in the set of
         remaining nodes
@@ -32,7 +32,7 @@ class StrategyBuilder:
         Define and return the inactive strategy
         :return: function that returns None when being called (player won't do anything)
         """
-        def inactive_strategy(nb_nodes, node_id, history):
+        def inactive_strategy(nb_nodes, node_id, history, impossible_edges, imposed_edges):
             return None
         return inactive_strategy
 
@@ -43,7 +43,7 @@ class StrategyBuilder:
         :return: function that returns a random action (random edge) knowing that a looping edge (u == v) is not
         allowed in the game and is therefore replaced by None
         """
-        def random_strategy(nb_nodes, node_id, history):
+        def random_strategy(nb_nodes, node_id, history, impossible_edges, imposed_edges):
             u, v = randint(0, nb_nodes - 1), randint(0, nb_nodes - 1)
             if u == v:
                 return None
@@ -57,7 +57,7 @@ class StrategyBuilder:
         :return: function that returns a random action (random edge) knowing that a looping edge (u == v) is not
         allowed in the game and is therefore replaced by None
         """
-        def random_egoist_strategy(nb_nodes, node_id, history):
+        def random_egoist_strategy(nb_nodes, node_id, history, impossible_edges, imposed_edges):
             return self.get_random_egoist_edge(nb_nodes, node_id)
         return random_egoist_strategy
 
@@ -67,7 +67,7 @@ class StrategyBuilder:
         when connected to everyone
         :return: function computing the edge of the follower strategy
         """
-        def follower_strategy(nb_nodes, node_id, history):
+        def follower_strategy(nb_nodes, node_id, history, impossible_edges, imposed_edges):
 
             # build graph related to the current state
             graph = nx.Graph()
@@ -91,7 +91,7 @@ class StrategyBuilder:
         Define and return the greedy strategy (myopic, only based on the current state and best current action)
         :return: function that returns the best myopic action given the current state
         """
-        def greedy_strategy(nb_nodes, node_id, history):
+        def greedy_strategy(nb_nodes, node_id, history, impossible_edges, imposed_edges):
 
             # if graph is empty, return random egoist
             if len(history[len(history) - 1]) == 0:
@@ -105,11 +105,13 @@ class StrategyBuilder:
             # initialize the best current action
             best_u, best_v, best_bet = 0, 0, nx.betweenness_centrality(graph)[node_id]
 
-            # create the possibilities
-            possibilities = list(itertools.combinations(range(nb_nodes), r=2))
+            # create the list of possible edges
+            edges_combination = list(itertools.combinations(range(nb_nodes), r=2))
+            possible_edges = set(edges_combination) - set(impossible_edges)
+            possible_edges -= set(imposed_edges)
 
             # iterate through all possible action (possible edge) and keep track of the best choice
-            for i, j in possibilities:
+            for i, j in possible_edges:
                     if graph.has_edge(i, j):
                         graph.remove_edge(i, j)
 
@@ -140,7 +142,7 @@ class StrategyBuilder:
         Define and return the greedy strategy (myopic, only based on the current state and best current action)
         :return: function that returns the best myopic ation given the current state
         """
-        def approx_greedy_strategy(nb_nodes, node_id, history, EPSILON=EPSILON, DELTA=DELTA):
+        def approx_greedy_strategy(nb_nodes, node_id, history, impossible_edges, imposed_edges, EPSILON=EPSILON, DELTA=DELTA):
             # if graph is empty, return random egoist
             EPSILON = EPSILON
             DELTA = DELTA
@@ -155,8 +157,11 @@ class StrategyBuilder:
             # initialize the best current action
             best_u, best_v, best_bet = 0, 0, approximate_betweenness_centrality(graph, eps=EPSILON, delta=DELTA)[node_id]
 
-            # all possible edges:
-            possible_edges = list(itertools.combinations(list(range(nb_nodes)), 2))
+            # create the list of possible edges
+            edges_combination = list(itertools.combinations(range(nb_nodes), r=2))
+            possible_edges = set(edges_combination) - set(impossible_edges)
+            possible_edges -= set(imposed_edges)
+
             # iterate through all possible action (possible edge) and keep track of the best choice
             for i, j in possible_edges:
                 if graph.has_edge(i, j):
