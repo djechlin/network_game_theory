@@ -50,6 +50,11 @@ class Player:
     def rules(self, value):
         self._rules = value
 
+    """
+    API ref, contract of what users should call from the outside
+    Mainly allows to change internal attribute names and have more
+    encapsulation.
+    """
     @property
     def type(self):
         return self._type

@@ -3,6 +3,7 @@ from .entity import EntityType
 import networkx as nx
 
 import math
+import itertools
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -238,7 +239,6 @@ def _get_leader_board(game, round_number, leader_board_size, significant_digits)
         )
     )
 
-
 """
 Rewrite draw_networkx to attach mlp canvas and handle user events
 """
@@ -381,8 +381,6 @@ def draw_networkx(G, pos=None, arrows=True, with_labels=True, **kwds):
     if with_labels:
         nx.draw_networkx_labels(G, pos, **kwds)
     plt.draw_if_interactive()
-
-    return node_collection
 
 
 def draw_networkx_nodes(G, pos,
