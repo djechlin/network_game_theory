@@ -128,12 +128,13 @@ class Plotter:
         :param node_list: [int], node to be plotted
         :return: void
         """
-        if interactive:
+        positions = self.get_positions(game.rules.nb_players)
+        colors = self.get_colors(game)
+        alpha = self.node_transparency
+        graphs = [self.get_graph_labels_sizes(game, round_number, node_list)
+                  for round_number in range(len(game.history))]
 
-            positions = self.get_positions(game.rules.nb_players)
-            colors = self.get_colors(game)
-            graphs = [self.get_graph_labels_sizes(game, round_number, node_list)
-                      for round_number in range(len(game.history))]
+        if interactive:
 
             # keyboard event handler
             def key_event(e):
@@ -154,22 +155,15 @@ class Plotter:
 
                 ax.cla()
 
+                graph = graphs[curr_pos][0]
+                labels = graphs[curr_pos][1]
+                sizes = graphs[curr_pos][2]
+                leader_board_str = ''
                 if leader_board:
-                    plt.axis([-1.5, 2, -2, 2])
-                    plt.axis('off')
-                    plt.text(1.5, 2,
-                             _get_leader_board(game, curr_pos, self.leader_board_size, self.significant_digits)
-                             )
+                    leader_board_str = _get_leader_board(game, curr_pos, self.leader_board_size, self.significant_digits)
 
-                else:
-                    plt.axis([-2, 2, -2, 2])
-                    plt.axis('off')
-
-                if self.labels_interactive_graph:
-                    nx.draw_networkx(graphs[curr_pos][0], positions, labels=graphs[curr_pos][1], node_color=colors,
-                                     node_size=graphs[curr_pos][2], alpha=self.node_transparency)
-                else:
-                    nx.draw_networkx(graphs[curr_pos][0], positions, node_color=colors, alpha=self.node_transparency)
+                _display_graph(graph, positions, labels, colors, sizes, alpha, leader_board=leader_board_str,
+                               display_labels=self.labels_interactive_graph)
 
                 fig.canvas.draw()
 
@@ -178,22 +172,15 @@ class Plotter:
             fig.canvas.mpl_connect('key_press_event', key_event)
             ax = fig.add_subplot(111)
 
+            graph = graphs[0][0]
+            labels = graphs[0][1]
+            sizes = graphs[0][2]
+            leader_board_str = ''
             if leader_board:
-                plt.axis([-1.5, 2, -2, 2])
-                plt.axis('off')
-                plt.text(1.5, 2,
-                         _get_leader_board(game, 0, self.leader_board_size, self.significant_digits)
-                         )
+                leader_board_str = _get_leader_board(game, 0, self.leader_board_size, self.significant_digits)
 
-            else:
-                plt.axis([-2, 2, -2, 2])
-                plt.axis('off')
-
-            if self.labels_interactive_graph:
-                nx.draw_networkx(graphs[0][0], positions, labels=graphs[0][1], node_color=colors,
-                                 node_size=graphs[0][2], alpha=self.node_transparency)
-            else:
-                nx.draw_networkx(graphs[0][0], positions, node_color=colors, alpha=self.node_transparency)
+            _display_graph(graph, positions, labels, colors, sizes, alpha, leader_board=leader_board_str,
+                           display_labels=self.labels_interactive_graph)
 
             plt.show()
 
@@ -201,30 +188,42 @@ class Plotter:
 
             plt.ion()
 
-            positions = self.get_positions(game.rules.nb_players)
-            colors = self.get_colors(game)
-
             for round_number in range(len(game.history)):
+
                 plt.clf()
 
+                graph = graphs[round_number][0]
+                labels = graphs[round_number][1]
+                sizes = graphs[round_number][2]
+                leader_board_str = ''
                 if leader_board:
-                    plt.axis([-1.5, 2, -2, 2])
-                    plt.axis('off')
-                    plt.text(1.5, 2,
-                             _get_leader_board(game, round_number, self.leader_board_size, self.significant_digits)
-                             )
+                    leader_board_str = _get_leader_board(game, round_number, self.leader_board_size,
+                                                         self.significant_digits)
 
-                else:
-                    plt.axis([-2, 2, -2, 2])
-                    plt.axis('off')
+                _display_graph(graph, positions, labels, colors, sizes, alpha, leader_board=leader_board_str,
+                               display_labels=True)
 
-                current_graph, labels, sizes = self.get_graph_labels_sizes(game, round_number, node_list)
-                nx.draw_networkx(current_graph, positions, labels=labels, node_color=colors, node_size=sizes,
-                                 alpha=self.node_transparency)
                 plt.pause(time_step)
 
             while True:
                 plt.pause(0.05)
+
+
+def _display_graph(graph, positions, labels, colors, sizes, alpha, leader_board=None, display_labels=False):
+
+    if leader_board:
+        plt.axis([-1.5, 2, -2, 2])
+        plt.axis('off')
+        plt.text(1.5, 2, leader_board)
+    else:
+        plt.axis([-2, 2, -2, 2])
+        plt.axis('off')
+
+    if display_labels:
+        nx.draw_networkx(graph, positions, labels=labels, node_color=colors,
+                         node_size=sizes, alpha=alpha)
+    else:
+        nx.draw_networkx(graph, positions, node_color=colors, alpha=alpha)
 
 
 def _get_leader_board(game, round_number, leader_board_size, significant_digits):
