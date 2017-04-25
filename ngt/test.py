@@ -12,11 +12,21 @@ from centrality.plot import Plotter
 
 if __name__ == '__main__':
 
+    """
+    Create a game by instantiating all the helper objects
+    """
+
     rules = Rules()
     rules.nb_max_step = 10
 
     game1 = Game()
     game1.rules = rules
+
+    """
+    Create some players and add them to the game
+    After having initialized the graph so that
+    every player receives an id, add some impossible edges
+    """
 
     strategy_builder = StrategyBuilder()
 
@@ -43,13 +53,47 @@ if __name__ == '__main__':
 
     game1.impossible_edges = [(player1.node_id, player2.node_id), (player2.node_id, player1.node_id)]
 
-    print(game1.impossible_edges)
-    print(player1.node_id)
-    print(player2.node_id)
+    """
+    Play the game
+    """
 
     game1.play_game()
 
-    plotter = Plotter()
-    plotter.plot_game(game1, interactive=True, leader_board=True, time_step=0.01)
+    """
+    Replay graphically the game
+    """
 
-    # plotter.plot_game(game1, interactive=True, time_step=0.01, leader_board=True, node_list=[0, 1, 2, 3, 4, 5, 6, 7])
+    plotter = Plotter()
+
+    # plotter.plot_game(game1, interactive=False, leader_board=True, time_step=0.01)
+
+    # Interactive mode
+    plotter.plot_game(game1, interactive=True, time_step=0.01, leader_board=True, node_list=[0, 1, 2, 3, 4, 5, 6, 7])
+
+    # Metrics
+
+    #
+    # from matplotlib.pyplot import figure, show
+    # import numpy as npy
+    # from numpy.random import rand
+    #
+    # if 1:  # picking on a scatter plot (matplotlib.collections.RegularPolyCollection)
+    #
+    #     x, y, c, s = rand(4, 100)
+    #
+    #
+    #     def onpick3(event):
+    #         ind = event.ind
+    #         artist = event.artist
+    #         print('onpick3 scatter:', ind, npy.take(x, ind), npy.take(y, ind))
+    #         print(artist)
+    #
+    #     fig = figure()
+    #     ax1 = fig.add_subplot(111)
+    #     col = ax1.scatter(x, y, 100 * s, c, picker=True)
+    #     # fig.savefig('pscoll.eps')
+    #     fig.canvas.mpl_connect('pick_event', onpick3)
+    #
+    # show()
+
+

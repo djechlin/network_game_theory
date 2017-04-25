@@ -4,6 +4,7 @@ from .player import Player
 import pickle
 import networkx as nx
 
+
 class Game:
     def __init__(self):
         self.rules = Rules()

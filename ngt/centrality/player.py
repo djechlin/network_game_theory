@@ -9,10 +9,15 @@ class Player:
     def __init__(self):
         self.rules = Rules()
         self._type = EntityType.non_competitive_player
-        self.node_id = -1
-        self.name = "John"
-        self.strategy = lambda nb_nodes, node_id, history: None
+        self._node_id = -1
+        self._name = "John"
+        self._strategy = lambda nb_nodes, node_id, history: None
 
+    """
+    API ref, contract of what users should call from the outside
+    Mainly allows to change internal attribute names and have more
+    encapsulation.
+    """
     @property
     def type(self):
         return self._type
@@ -20,6 +25,30 @@ class Player:
     @type.setter
     def type(self, value):
         self._type = value
+
+    @property
+    def node_id(self):
+        return self._node_id
+
+    @node_id.setter
+    def node_id(self, value):
+        self._node_id = value
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @property
+    def strategy(self):
+        return self._strategy
+
+    @strategy.setter
+    def node_id(self, value):
+        self._strategy = value
 
     def get_action(self, game, node_id):
         """
