@@ -11,6 +11,7 @@ from centrality.player import Player
 from centrality.entity import EntityType
 from centrality.game import Game
 from centrality.plot import Plotter
+from centrality.game import Metrics
 
 if __name__ == '__main__':
 
@@ -56,7 +57,8 @@ if __name__ == '__main__':
 
     game1.play_game(True)
 
-    print(game1.metrics)
+    # print(game1.metrics)
+    # print(game1.metrics.index.values)
 
     """
     Save the game
@@ -77,7 +79,22 @@ if __name__ == '__main__':
     """
 
     plotter = Plotter()
-    plotter.plot_game(game1, interactive=False, leader_board=True, time_step=0.01)
+    # plotter.plot_game(game1, interactive=False, leader_board=True, time_step=0.01)
+
+    # plotter.plot_micro(game1, Metrics.micro_average_neighbor_degree)
+
+    # plotter.plot_micro_distrib(game1, Metrics.micro_average_neighbor_degree)
+
+    plotter.multi_plot(game1, Metrics.macro_average_clustering, Metrics.micro_average_neighbor_degree, Metrics.micro_average_neighbor_degree)
+
+    # df = game1.metrics
+    # first_player = df[Metrics.micro_average_neighbor_degree.value].apply(lambda x: list(x.values()))
+    # print(first_player.index.values)
+    # print(first_player[0])
+
+    # import matplotlib.pyplot as plt
+    # plt.hist(first_player[0])
+    # plt.show()
 
     # Interactive mode
     # plotter.plot_game(game1, interactive=True, time_step=0.01, leader_board=True, node_list=[0, 1, 2, 3, 4, 5, 6, 7])

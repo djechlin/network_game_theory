@@ -8,35 +8,96 @@ import pandas as pd
 
 from enum import Enum
 
+
 class Metrics(Enum):
-    pass
-    # macro
-    # if round_number is not 0:
-    # print(nx.degree_assortativity_coefficient(graph))
-    # print(nx.transitivity(graph))
-    # print(nx.average_clustering(graph))
-    # print(nx.is_connected(graph))
-    # print(nx.number_connected_components(graph))
-    # print(nx.transitivity(graph))
-    # print(nx.transitivity(graph))
+    # warning round_number > 0
+    macro_degree_assortativity_coefficient = "macro_degree_assortativity_coefficient"
+    # macro_rich_club_coefficient = "macro_rich_club_coefficient"
 
+    macro_transitivity = "macro_transitivity"
+    macro_average_clustering = "macro_average_clustering"
+    macro_is_connected = "macro_is_connected"
+    macro_number_connected_components = "macro_number_connected_components"
+    macro_is_distance_regular = "macro_is_distance_regular"
+    macro_dominating_set = "macro_dominating_set"
+    macro_is_eulerian = "macro_is_eulerian"
+    macro_isolates = "macro_isolates"
 
+    # warning is_connected
+    macro_diameter = "macro_diameter"
+    macro_center = "macro_center"
+    macro_periphery = "macro_periphery"
+    macro_radius = "macro_radius"
+    macro_average_shortest_path_length = "macro_average_shortest_path_length"
+    micro_eccentricity = "micro_eccentricity"
 
-    # micro
-    # print(nx.average_neighbor_degree(graph))
-    # print(nx.clustering(graph))
+    micro_average_neighbor_degree = "micro_average_neighbor_degree"
+    micro_clustering = "micro_clustering"
+    micro_degree_centrality = "micro_degree_centrality"
+    micro_closeness_centrality = "micro_closeness_centrality"
+    micro_communicability_centrality = "micro_communicability_centrality"
+    micro_load_centrality = "micro_load_centrality"
+    micro_betweenness_centrality = "micro_betweenness_centrality"
+    micro_triangles = "micro_triangles"
+    micro_square_clustering = "micro_square_clustering"
+    micro_core_number = "micro_core_number"
+    micro_closeness_vitality = "micro_closeness_vitality"
 
-    # could be used instead of betweenness centrality
-    # print(nx.degree_centrality(graph))
-    # print(nx.closeness_centrality(graph))
-    # print(nx.communicability_centrality(graph))
-    # print(nx.load_centrality(graph))
-    # print(nx.betweenness_centrality(graph))
-    # print(nx.triangles(graph))
-    # print(nx.square_clustering(graph))
 
 def _get_column_names():
-    return ['Family', 'Betweenness', 'Weighted betweenness']
+    return [metric.value for metric in Metrics]
+
+
+def _get_metrics(graph):
+    res = []
+
+    # macro
+    if len(graph.edges()) is not 0:
+        res.append(nx.degree_assortativity_coefficient(graph))
+        # res.append(nx.rich_club_coefficient(graph))
+    else:
+        res.append(None)
+        res.append(None)
+
+    res.append(nx.transitivity(graph))
+    res.append(nx.average_clustering(graph))
+    res.append(nx.is_connected(graph))
+    res.append(nx.number_connected_components(graph))
+    res.append(nx.is_distance_regular(graph))
+    res.append(nx.dominating_set(graph))
+    res.append(nx.is_eulerian(graph))
+    res.append(nx.isolates(graph))
+
+    if nx.is_connected(graph):
+        res.append(nx.diameter(graph))
+        res.append(nx.center(graph))
+        res.append(nx.periphery(graph))
+        res.append(nx.radius(graph))
+        res.append(nx.average_shortest_path_length(graph))
+        res.append(nx.eccentricity(graph))
+    else:
+        res.append(None)
+        res.append(None)
+        res.append(None)
+        res.append(None)
+        res.append(None)
+        res.append(None)
+
+    # micro
+    res.append(nx.average_neighbor_degree(graph))
+    res.append(nx.clustering(graph))
+    res.append(nx.degree_centrality(graph))
+    res.append(nx.closeness_centrality(graph))
+    res.append(nx.communicability_centrality(graph))
+    res.append(nx.load_centrality(graph))
+    res.append(nx.betweenness_centrality(graph))
+    res.append(nx.triangles(graph))
+    res.append(nx.square_clustering(graph))
+    res.append(nx.core_number(graph))
+    res.append(nx.closeness_vitality(graph))
+
+    return res
+
 
 class Game:
     def __init__(self):
@@ -117,10 +178,7 @@ class Game:
         self.history[self.current_step] = self.graph.edges()
 
         if metrics:
-            self.metrics.loc[len(self.metrics)] = \
-                [1,
-                 2,
-                 3]
+            self.metrics.loc[len(self.metrics)] = _get_metrics(self.graph)
 
     def play_game(self, metrics=False):
         """

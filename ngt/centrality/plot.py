@@ -104,19 +104,45 @@ class Plotter:
     """
     functions to plot evolution of macro measures through time
     """
-
-
-
+    def plot_macro(self, game, metric, ax):
+        df = game.metrics
+        sc = ax.scatter(df.index.values, df[metric.value])
+        return sc
 
     """
     functions to plot evolution of :X micro measure through time
     """
+    def plot_micro(self, game, metric, ax):
+        df = game.metrics
+        first_player = df[metric.value].apply(lambda x: x[0])
+        pl = ax.plot(df.index.values, first_player)
+        return pl
 
     """
     functions to plot micro measures distribution
     """
+    def plot_micro_distrib(self, game, metric, ax=None):
+        df = game.metrics
+        first_player = df[metric.value].apply(lambda x: list(x.values()))
+        hi = ax.hist(first_player[0])
+        return hi
 
+    def multi_plot(self, game, m1, m2, m3):
+        fig = plt.figure()
 
+        ax1 = fig.add_subplot(2, 2, 1)
+        self.plot_macro(game, m1, ax1)
+
+        ax2 = fig.add_subplot(2, 2, 2)
+        self.plot_micro(game, m2, ax2)
+
+        ax3 = fig.add_subplot(2, 2, 3)
+        self.plot_micro_distrib(game, m3, ax3)
+
+        ax4 = fig.add_subplot(2, 2, 4)
+        ax4.plot([1, 2, 3, 4], [0, 0, 1, 1], 'g-')
+
+        plt.show()
 
 
     """
@@ -220,32 +246,6 @@ class Plotter:
                 plt.clf()
 
                 graph = graphs[round_number][0]
-
-                # macro
-                # if round_number is not 0:
-                    # print(nx.degree_assortativity_coefficient(graph))
-                # print(nx.transitivity(graph))
-                # print(nx.average_clustering(graph))
-                # print(nx.is_connected(graph))
-                print(nx.number_connected_components(graph))
-                # print(nx.transitivity(graph))
-                # print(nx.transitivity(graph))
-
-
-
-                # micro
-                # print(nx.average_neighbor_degree(graph))
-                # print(nx.clustering(graph))
-
-                # could be used instead of betweenness centrality
-                # print(nx.degree_centrality(graph))
-                # print(nx.closeness_centrality(graph))
-                # print(nx.communicability_centrality(graph))
-                # print(nx.load_centrality(graph))
-                # print(nx.betweenness_centrality(graph))
-                # print(nx.triangles(graph))
-                # print(nx.square_clustering(graph))
-
 
                 labels = graphs[round_number][1]
                 sizes = graphs[round_number][2]
