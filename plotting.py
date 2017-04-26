@@ -1,3 +1,5 @@
+# credit to Denny Britz
+# https://github.com/dennybritz/reinforcement-learning
 import matplotlib
 import numpy as np
 import pandas as pd
