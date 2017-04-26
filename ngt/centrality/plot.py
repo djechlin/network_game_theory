@@ -104,7 +104,7 @@ class Plotter:
         df = game.metrics.iloc[:round_number+1, :]
         pl = ax.plot(df.index.values, df[metric.value])
         plt.title(" ".join(metric.value.split("_")[1:]))
-        plt.axis([-1, 21, 0, 10])
+        plt.axis([-1, len(game.history)+1, df[metric.value].min()-1, df[metric.value].max()+1])
         return pl
 
     def build_plot_micro(self, game, round_number, node_ids, metric, ax):
@@ -112,7 +112,8 @@ class Plotter:
         for i in node_ids:
             val = df[metric.value].apply(lambda x: x[i])
             pl = ax.plot(df.index.values, val)
-            plt.title("test2")
+            plt.title(" ".join(metric.value.split("_")[1:]))
+            plt.axis([-1, len(game.history)+1, min(df[metric.value].apply(min)) -1, max(df[metric.value].apply(max)) +1])
         return pl
     # ill coded, return pl? / could also apply and create new col instead of slicing every time
 
@@ -127,6 +128,7 @@ class Plotter:
         df = game.metrics.iloc[:round_number+1, :]
         val = df[metric.value].apply(lambda x: list(x.values()))
         hi = ax.hist(val[round_number], alpha=0.5, color='b')
+        plt.title((" ".join(metric.value.split("_")[1:]) + " distribution"))
         return hi
 
 
