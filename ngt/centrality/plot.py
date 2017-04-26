@@ -152,6 +152,10 @@ class Plotter:
 
         plt.show()
 
+    """
+    Plot the overall game
+    """
+
     def multi_plot_dynamic(self, game, node_ids, metrics, interactive=False, time_step=0.05):
 
         if interactive:
@@ -170,18 +174,14 @@ class Plotter:
 
                 curr_pos = self.current_interactive_graph
 
-                ax.cla()
-
-                self.multi_plot(game, curr_pos, node_ids, metrics)
+                self.multi_plot(game, curr_pos, node_ids, metrics, fig)
 
                 fig.canvas.draw()
 
             fig = plt.figure()
-
             fig.canvas.mpl_connect('key_press_event', key_event)
-            ax = fig.add_subplot(111)
 
-            self.multi_plot(game, 0, node_ids, metrics)
+            self.multi_plot(game, 0, node_ids, metrics, fig)
 
             plt.show()
 
