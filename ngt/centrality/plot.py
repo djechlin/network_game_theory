@@ -7,8 +7,8 @@ import itertools
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-plt.style.use('seaborn-poster')
-
+plt.style.use('seaborn')
+# print(plt.style.available)
 
 class Plotter:
     def __init__(self):
@@ -22,6 +22,9 @@ class Plotter:
         self.labels_interactive_graph = False  # Allow to display the labels in interactive mode
         self.leader_board_size = 3
 
+    """
+    Helper functions to build components later used to plot networks
+    """
     @staticmethod
     def get_positions(nb_players):
         """
@@ -52,13 +55,6 @@ class Plotter:
             else:
                 colors += self.color_other_entity
         return colors
-
-    """
-    Note: Metrics are computed after the game is played
-    This is a trade off, since we could avoid to recompute graphs after the game by
-    directly computing everything in the Game.play_round() method but this would slow
-    down the execution of a game. As is, the code is more modular.
-    """
 
     def get_graph_labels_sizes(self, game, round_number, node_list=None):
         """
@@ -102,52 +98,104 @@ class Plotter:
         return current_graph, labels, sizes
 
     """
-    functions to plot evolution of macro measures through time
+    Helper functions to build artists to plot metrics given axes ref
     """
-    def plot_macro(self, game, metric, ax):
-        df = game.metrics
-        sc = ax.scatter(df.index.values, df[metric.value])
-        return sc
-
-    """
-    functions to plot evolution of :X micro measure through time
-    """
-    def plot_micro(self, game, metric, ax):
-        df = game.metrics
-        first_player = df[metric.value].apply(lambda x: x[0])
-        pl = ax.plot(df.index.values, first_player)
+    def build_plot_macro(self, game, round_number, metric, ax):
+        df = game.metrics.iloc[:round_number+1, :]
+        pl = ax.plot(df.index.values, df[metric.value])
+        plt.title(" ".join(metric.value.split("_")[1:]))
+        plt.axis([-1, 21, 0, 10])
         return pl
 
-    """
-    functions to plot micro measures distribution
-    """
-    def plot_micro_distrib(self, game, metric, ax=None):
-        df = game.metrics
-        first_player = df[metric.value].apply(lambda x: list(x.values()))
-        hi = ax.hist(first_player[0])
+    def build_plot_micro(self, game, round_number, node_ids, metric, ax):
+        df = game.metrics.iloc[:round_number+1, :]
+        for i in node_ids:
+            val = df[metric.value].apply(lambda x: x[i])
+            pl = ax.plot(df.index.values, val)
+            plt.title("test2")
+        return pl
+    # ill coded, return pl? / could also apply and create new col instead of slicing every time
+
+    def build_plot_micro_distrib(self, game, round_number, metric, ax):
+        # Superpose hist only if you can find colors shade that make the intent obvious
+
+        # df = game.metrics.iloc[:round_number+1, :]
+        # val = df[metric.value].apply(lambda x: list(x.values()))
+        # for i in range(round_number+1):
+        #     hi = ax.hist(val[i], alpha=(i*0.05+0.2), color='b')
+        # return hi
+        df = game.metrics.iloc[:round_number+1, :]
+        val = df[metric.value].apply(lambda x: list(x.values()))
+        hi = ax.hist(val[round_number], alpha=0.5, color='b')
         return hi
 
-    def multi_plot(self, game, m1, m2, m3):
-        fig = plt.figure()
 
-        ax1 = fig.add_subplot(2, 2, 1)
-        self.plot_macro(game, m1, ax1)
+    """
+    Plot multiple views
+    """
 
-        ax2 = fig.add_subplot(2, 2, 2)
-        self.plot_micro(game, m2, ax2)
+    def multi_plot(self, game, round_number, node_ids, metrics, fig):
+        plt.clf()
 
-        ax3 = fig.add_subplot(2, 2, 3)
-        self.plot_micro_distrib(game, m3, ax3)
-
-        ax4 = fig.add_subplot(2, 2, 4)
-        ax4.plot([1, 2, 3, 4], [0, 0, 1, 1], 'g-')
+        for metric in metrics:
+            if "macro" == metric[0]:
+                ax = fig.add_subplot(*metric[2])
+                self.build_plot_macro(game, round_number, metric[1], ax)
+            elif "micro" == metric[0]:
+                ax = fig.add_subplot(*metric[2])
+                self.build_plot_micro(game, round_number, node_ids, metric[1], ax)
+            elif "micro_distrib" == metric[0]:
+                ax = fig.add_subplot(*metric[2])
+                self.build_plot_micro_distrib(game, round_number, metric[1], ax)
 
         plt.show()
 
+    def multi_plot_dynamic(self, game, node_ids, metrics, interactive=False, time_step=0.05):
 
-    """
-    plot_state and plot_game to draw network and replay game
-    """
+        if interactive:
+
+            # keyboard event handler
+            def key_event(e):
+
+                if e.key == "right":
+                    self.current_interactive_graph += 1
+                elif e.key == "left":
+                    self.current_interactive_graph -= 1
+                else:
+                    return
+
+                self.current_interactive_graph %= len(game.history)
+
+                curr_pos = self.current_interactive_graph
+
+                ax.cla()
+
+                self.multi_plot(game, curr_pos, node_ids, metrics)
+
+                fig.canvas.draw()
+
+            fig = plt.figure()
+
+            fig.canvas.mpl_connect('key_press_event', key_event)
+            ax = fig.add_subplot(111)
+
+            self.multi_plot(game, 0, node_ids, metrics)
+
+            plt.show()
+
+        else:
+
+            fig = plt.figure()
+
+            plt.ion()
+
+            for round_number in range(len(game.history)-1):
+
+                self.multi_plot(game, round_number, node_ids, metrics, fig)
+                plt.pause(time_step)
+
+            while True:
+                plt.pause(0.05)
 
     def plot_state(self, game, node_list=None, block=True):
         """

@@ -20,7 +20,7 @@ if __name__ == '__main__':
     """
 
     rules = Rules()
-    rules.nb_max_step = 10
+    rules.nb_max_step = 20
 
     game1 = Game()
     game1.rules = rules
@@ -85,7 +85,17 @@ if __name__ == '__main__':
 
     # plotter.plot_micro_distrib(game1, Metrics.micro_average_neighbor_degree)
 
-    plotter.multi_plot(game1, Metrics.macro_average_clustering, Metrics.micro_average_neighbor_degree, Metrics.micro_average_neighbor_degree)
+
+    metrics_pos = [
+        ("macro", Metrics.macro_number_connected_components, (2, 2, 1)),
+        ("micro", Metrics.micro_average_neighbor_degree, (2, 2, 2)),
+        ("micro_distrib", Metrics.micro_average_neighbor_degree, (2, 2, 3)),
+    ]
+
+    # plotter.multi_plot(game1, 5, [0, 2], metrics_pos)
+
+    plotter.multi_plot_dynamic(game1, [0, 2], metrics_pos)
+
 
     # df = game1.metrics
     # first_player = df[Metrics.micro_average_neighbor_degree.value].apply(lambda x: list(x.values()))
