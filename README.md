@@ -1,1 +1,1 @@
-Let's put the rules here from the LaTeX projects file
+How do players achieve importance within networks? We consider a simple game in which a fraction of players actively pursue increased betweenness centrality through a variety of profiles, both heuristic and learned. Lastly, we characterize theoretical, simulation, and reinforcement learning dynamics of network formation under betweenness centrality rewards.
