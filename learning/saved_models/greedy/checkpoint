@@ -1,0 +1,2 @@
+model_checkpoint_path: "approx_greedy_model.ckpt"
+all_model_checkpoint_paths: "approx_greedy_model.ckpt"
