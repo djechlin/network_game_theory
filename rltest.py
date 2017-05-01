@@ -1,4 +1,3 @@
-
 # see https://github.com/awjuliani/DeepRL-Agents
 # for reference on Q network
 import numpy as np

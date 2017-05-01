@@ -1,5 +1,5 @@
 import itertools
-import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import tensorflow as tf
@@ -7,12 +7,13 @@ import collections
 from networkenv import NetworkEnv
 import game
 from lib import plotting
-from utils import create_greedy_player
+import utils
+import networkx as nx
 
 # create some rules for the game
 r = game.Rules()
 r.nb_max_step = 20
-r.nb_players = 10
+r.nb_players = 5
 # create a game with these rules
 g = game.Game(r)
 p1 = game.Player()
@@ -21,18 +22,22 @@ p1.rules = r
 p1.type = game.EntityType.competitive_player
 g.add_player(p1)
 
-greedy_player = create_greedy_player("Heuristic", r)
+greedy_player = utils.create_greedy_player("Heuristic", r)
 g.add_player(greedy_player)
+
+# create an RL environment with with game
+env = NetworkEnv(g, reward_func="centrality")
 
 # create an RL environment with with game
 env = NetworkEnv(g)
 
+# https://github.com/dennybritz/reinforcement-learning
 class PolicyEstimator():
     """
     Policy Function approximator. 
     """
     
-    def __init__(self, learning_rate=0.01, scope="policy_estimator"):
+    def __init__(self, learning_rate=0.001, scope="policy_estimator"):
         with tf.variable_scope(scope):
             self.state = tf.placeholder(tf.float32, [1, env.observation_space.shape], "state")
             self.action = tf.placeholder(dtype=tf.int32, name="action")
@@ -44,14 +49,14 @@ class PolicyEstimator():
                 inputs=tf.expand_dims(self.state, 0),
                 num_outputs=env.action_space.n,
                 activation_fn=None,
-                weights_initializer=None)
+                weights_initializer=tf.contrib.layers.xavier_initializer(uniform=True, seed=None, dtype=tf.float32))
 
             self.action_probs = tf.squeeze(tf.nn.softmax(self.output_layer))
             self.picked_action_prob = tf.gather(self.action_probs, self.action)
 
             # Loss and train op
-            self.loss = -tf.log(self.picked_action_prob) * self.target
-
+            self.l2_loss = tf.add_n([tf.nn.l2_loss(v) for v in tf.trainable_variables()]) 
+            self.loss = -tf.log(self.picked_action_prob) * self.target + 0.002 * self.l2_loss
             self.optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
             self.train_op = self.optimizer.minimize(
                 self.loss, global_step=tf.contrib.framework.get_global_step())
@@ -71,7 +76,7 @@ class ValueEstimator():
     Value Function approximator. 
     """
     
-    def __init__(self, learning_rate=0.1, scope="value_estimator"):
+    def __init__(self, learning_rate=0.001, scope="value_estimator"):
         with tf.variable_scope(scope):
             self.state = tf.placeholder(tf.float32, [1, env.observation_space.shape], "state")
             self.target = tf.placeholder(dtype=tf.float32, name="target")
@@ -82,7 +87,8 @@ class ValueEstimator():
                 inputs=tf.expand_dims(self.state, 0),
                 num_outputs=1,
                 activation_fn=None,
-                weights_initializer=None)
+                weights_initializer=tf.contrib.layers.xavier_initializer(uniform=True, seed=None, dtype=tf.float32))
+
 
             self.value_estimate = tf.squeeze(self.output_layer)
             self.loss = tf.squared_difference(self.value_estimate, self.target)
@@ -125,9 +131,11 @@ def reinforce(env, estimator_policy, estimator_value, num_episodes, discount_fac
     Transition = collections.namedtuple("Transition", ["state", "action", "reward", "next_state", "done"])
     
     for i_episode in range(num_episodes):
-        # Reset the environment and pick the fisrst action
+        if i_episode % 100 == 0:
+            env.render()
+        # Reset the environment and pick the first action
         state = env.reset()
-        
+            
         episode = []
         
         # One step in the environment
@@ -155,7 +163,9 @@ def reinforce(env, estimator_policy, estimator_value, num_episodes, discount_fac
                 break
                 
             state = next_state
-    
+        
+        #if i_episode % 50 == 0:
+         #   env.render()  
         # Go through the episode and make policy updates
         for t, transition in enumerate(episode):
             # The return after this timestep
@@ -176,10 +186,6 @@ global_step = tf.Variable(0, name="global_step", trainable=False)
 policy_estimator = PolicyEstimator()
 value_estimator = ValueEstimator()
 
-print("Created networks, initializing tensorflow session")
-
 with tf.Session() as sess:
-    sess.run(tf.initialize_all_variables())
-    # Note, due to randomness in the policy the number of episodes you need to learn a good
-    # policy may vary. ~2000-5000 seemed to work well for me.
-    stats = reinforce(env, policy_estimator, value_estimator, 2000, discount_factor=1.0)
+    sess.run(tf.global_variables_initializer())
+    stats = reinforce(env, policy_estimator, value_estimator, 2000, discount_factor=.99)
