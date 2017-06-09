@@ -1,5 +1,7 @@
 ## TO DO
 
+* Add unit test
+
 * README, license, install, etc
 
 * Modify plot code to return ax and handle the interactive display externally (decouple)
