@@ -1,137 +1,101 @@
-.. Networks and Game Theory documentation master file, created by
-   sphinx-quickstart on Thu Apr 20 11:49:17 2017.
+.. NGT documentation master file, created by
+   sphinx-quickstart on Wed May 17 08:02:48 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Networks and Game Theory's documentation!
-====================================================
+Welcome to NGT's documentation!
+===============================
+
+NGT (Network Game Theory) is a package to help study game theory applications on dynamic networks. It is highly
+dependant on the networkX package. This package aims at providing:
+
+   * an interface to easily simulate classical game theory on dynamic networks situations
+   * analytical tools to study networks's metrics evolution through time
+
+Getting started
+===============
+
+Install the package by running the following command: pip install ngt
+
+Then, you will create a centrality game where players act on graph edges
+
+.. code-block:: python
+
+   """
+   Create rules and game
+   """
+
+   rules = ngt.Rules()
+   rules.nb_max_step = 20
+   rules.nb_players = 10
+
+   game = ngt.Game()
+   game.rules = rules
+
+   """
+   Create some players and add them to the game
+   After having initialized the graph so that
+   every player receives an id, add some impossible edges
+   """
+
+   player1 = Player(rules=rules,
+                    type=EntityType.competitive_player,
+                    name="Greedy1",
+                    strategy_type=Strategy.greedy)
+   player2 = Player(rules=rules,
+                    type=EntityType.human,
+                    name="Human1")
+
+   game.add_player(player1)
+   game.add_player(player2)
+
+   game.initialize_graph()
+
+   game.impossible_edges = [
+       (player1.node_id, player2.node_id)
+   ]
+
+   """
+   Play the game
+   """
+
+   game.play_game(True)
+
+   """
+   Save the game
+   """
+
+   # game.save(filename="game.pkl")
+
+   """
+   Load the game
+   """
+
+   # game = Game()
+   # game.load("game.pkl")
+
+   """
+   Replay the game
+   """
+
+   plotter = Plotter()
+   # plotter.plot_state(game)
+   plotter.plot_game(game, interactive=False, leader_board=True, time_step=0.01)
+
+
+Topical guides
+==============
+
+* Centrality maximisation
+* Virus/information propagation
+* Systemic risk in bank networks
+
+API reference
+=============
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   overview
-   api
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-
-
-#################
-About the project
-#################
-
-* Game API
-* GUI to play the game
-* Analysis tools
-
-
-For subtitles, switch to another punctuation mark
--------------------------------------------------
-
-*Italic* **bold** ``name`` ``function()`` ``expression = 3 + 3``
-
-`Hyperlink <http://en.wikipedia.org/wiki/Hyperlink>`_ `Link`_
-
-.. _Link: http://en.wikipedia.org/wiki/Link_(The_Legend_of_Zelda)
-
-.. image:: _img/figure_1-1.png
-
-.. A comment block starts with two periods, can continue indented.
-
-A paragraph is one or more lines of un-indented text, separated
-from the material above and below by blank lines.
-
-	“Block quotes look like paragraphs, but are indented with
-	one or more spaces.”
-
-| Because of the pipe characters, this will become one line,
-| And this will become another line, like in poetry.
-
-term
-	Definition for the “term”, indented beneath it.
-another term
-	And its definition; any of these definitions can continue on for
-	several lines by -- you guessed it! -- being similarly indented.
-
-* Each item in a list starts with an asterisk (or “1.”, “a.”, etc).
-* List items can go on for several lines as long as you remember to
-  keep the rest of the list item indented.
-
-Code blocks are introduced by a double-colon and are indented::
-
-	import docutils
-	print help(docutils)
-
->>> print 'But doctests start with ">>>" and need no indentation.'
-
-
-.. note::
-
-	Your note should consist of one or more paragraphs, all indented
-	so that they clearly belong to the note and not to the text or
-	directive that follows.
-
-	Many other directives are also supported, including: warning,
-	versionadded, versionchanged, seealso, deprecated, rubric,
-	centered, hlist, glossary, productionlist.
-
-.. code-block:: c
-   :linenos:
-
-	/* Or say "highlight::" once to set the language for all of the
-	   code blocks that follow it. Options include ":linenos:",
-	   ":linenothreshold:", and ":emphasize-lines: 1,2,3". */
-
-	char s[] = "You can also say 'python', 'ruby', ..., or 'guess'!";
-
-.. literalinclude:: example.py
-	:lines: 10-20
-	:emphasize-lines: 15,16
-
-.. module:: httplib
-
-.. class:: Request
-
-	Zero or more paragraphs of introductory material for the class.
-
-	.. method:: send()
-
-		Description of the send() method.
-
-	.. attribute:: url
-
-		Description of the url attribute.
-
-	Many more members are possible than just method and attribute,
-	and non-Python languages are supported too; see the Sphinx docs
-	for more possibilities!
-
-.. testcode::
-
-	print 'The doctest extension supports code without >>> prompts!'
-
-.. testoutput::
-
-	The doctest extension supports code without >>> prompts!
-
-.. _custom-label:
-
-.. index:: single: paragraph, targeted paragraph, indexed paragraph
-
-This paragraph can be targeted with :ref:`Lourd <custom-label>`, and will also
-be the :index:`target` of several index entries!
-
-This paragraph will be listed in the index under both “wire, copper”
-and “copper, wire.” See the Sphinx documentation for even more complex
-ways of building index entries.
-
-Many kinds of cross-reference can be used inside of a paragraph:
-
-
-
+   algorithms
+   centrality
