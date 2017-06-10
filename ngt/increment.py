@@ -8,8 +8,10 @@ Reactions = Dict[int, bool]
 
 
 class Increment:
-    """Class for objects hosting one step history"""
-    def __init__(self, actions: Actions = {}, reactions: Reactions = {}, graph: Graph = nx.Graph()):
+    """Class for objects hosting one step history
+
+    """
+    def __init__(self, actions: Actions ={}, reactions: Reactions ={}, graph: Graph =nx.Graph()):
         """Standard init method
 
         Args:

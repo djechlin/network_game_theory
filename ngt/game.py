@@ -6,7 +6,6 @@ Todo:
 
 .. _Google Python Style Guide:
    http://google.github.io/styleguide/pyguide.html
-
 """
 
 import networkx as nx

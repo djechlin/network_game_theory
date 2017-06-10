@@ -10,78 +10,88 @@ NGT (Network Game Theory) is a package to help study game theory applications on
 dependant on the networkX package. This package aims at providing:
 
    * an interface to easily simulate classical game theory on dynamic networks situations
-   * analytical tools to study networks's metrics evolution through time
+   * analytical tools to study networks' metrics evolution through time
 
 Getting started
 ===============
 
 Install the package by running the following command: pip install ngt
 
-Then, you will create a centrality game where players act on graph edges
+Then, you can create a centrality game where players aim at maximizing their betweenness centrality in the graph
+by acting on the graph's edges
 
 .. code-block:: python
 
-   """
-   Create rules and game
-   """
+    # Import used packages
 
-   rules = ngt.Rules()
-   rules.nb_max_step = 20
-   rules.nb_players = 10
+    import networkx
+    import ngt
 
-   game = ngt.Game()
-   game.rules = rules
+    # Create the graph that will be used in the game
 
-   """
-   Create some players and add them to the game
-   After having initialized the graph so that
-   every player receives an id, add some impossible edges
-   """
+    graph = networkx.Graph()
+    graph.add_nodes_from(list(range(10)))
 
-   player1 = Player(rules=rules,
-                    type=EntityType.competitive_player,
-                    name="Greedy1",
-                    strategy_type=Strategy.greedy)
-   player2 = Player(rules=rules,
-                    type=EntityType.human,
-                    name="Human1")
+    # Create the game
 
-   game.add_player(player1)
-   game.add_player(player2)
+    game_info = {
+        'nb_players': 10,
+        'nb_time_steps': 10,
+        'action_space': ActionSpace.edge,
+        'impossible_action': set((0, 1)),
+        'graph': graph,
+    }
 
-   game.initialize_graph()
+    game = Game(**game_info)
 
-   game.impossible_edges = [
-       (player1.node_id, player2.node_id)
-   ]
+    # Add some players
 
-   """
-   Play the game
-   """
+    player_info = {
+        'name': 'Leo',
+        'utility_function': Utility.betweenness_centrality,
+        'action_strategy': ActionStrategy.myopic_greedy,
+        # 'reaction_strategy': None,
+    }
+    player_info_2 = {
+        'name': 'Marc',
+        # 'type': EntityType.human,
+        'utility_function': Utility.betweenness_centrality,
+        'action_strategy': ActionStrategy.myopic_greedy,
+        # 'reaction_strategy': None,
+    }
 
-   game.play_game(True)
+    game.add_player(Player(**player_info))
+    # game.add_player(Player(**player_info_2))
 
-   """
-   Save the game
-   """
+    # Play the game
 
-   # game.save(filename="game.pkl")
+    game.play_game()
 
-   """
-   Load the game
-   """
+    # Save the game
 
-   # game = Game()
-   # game.load("game.pkl")
+    folder_name = 'my_game'
+    game.save(folder_name)
 
-   """
-   Replay the game
-   """
+    # Procrastinate
 
-   plotter = Plotter()
-   # plotter.plot_state(game)
-   plotter.plot_game(game, interactive=False, leader_board=True, time_step=0.01)
+    del game
 
+    # Load the game
+
+    game = Game.load(folder_name)
+
+    # Plot the game
+
+    plot_args = {
+        "node_transparency": 0.3,
+        "significant_digits": 4,
+        "leader_board_size": 3,
+    }
+
+    # still need to clean plot (return ax, handle display externally)
+    # plot(game, **plot_args)
+
+    # Analyze the game
 
 Topical guides
 ==============
@@ -97,5 +107,6 @@ API reference
    :maxdepth: 2
    :caption: Contents:
 
-   algorithms
-   centrality
+   rules
+   game
+   player

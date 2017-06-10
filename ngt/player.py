@@ -2,8 +2,8 @@
 """Classes and methods related to the concept of players/agents/entities.
 
 Todo:
-    * For module TODOs
-    * You have to also use ``sphinx.ext.todo`` extension
+    * Unit tests
+    * Option to plot if human (with control not just current last graph plot)
 
 .. _Google Python Style Guide:
    http://google.github.io/styleguide/pyguide.html
@@ -129,11 +129,8 @@ class Player:
                 print("You decided to build/destroy (use has_edge to choose between create and destroy) the edge (" + str(u) + ", " + str(v) + ")")
                 return u, v
 
-
-
             # should be handle by method plot, either automatic or pressing a key if you want plot to stay on screen
             # plt.close("all")
-
 
         return self.action_strategy(rules, agent_state, self.utility_function, player_id)
 
