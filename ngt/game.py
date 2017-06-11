@@ -92,7 +92,6 @@ class Game:
         """
         while self.current_time_step < self.rules.nb_time_steps:
             self.play_round()
-            print(self.history)
 
     def fetch_actions(self) -> Actions:
         """Fetch actions chosen by the players given the rules and the history

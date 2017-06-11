@@ -1,6 +1,6 @@
 Note: This license has also been called the "New BSD License" or "Modified BSD License"
 
-Copyright 2017 Leo Touroul
+Copyright 2017 Leo Touroul, Joshua Safyan, Agostino Capponi
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 

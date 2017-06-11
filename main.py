@@ -28,13 +28,13 @@ if __name__ == '__main__':
     # Add some players
 
     player_info = {
-        'name': 'Leo',
+        'name': 'Jack',
         'utility_function': Utility.betweenness_centrality,
         'action_strategy': ActionStrategy.myopic_greedy,
         # 'reaction_strategy': None,
     }
     player_info_2 = {
-        'name': 'Marc',
+        'name': 'John',
         # 'type': EntityType.human,
         'utility_function': Utility.betweenness_centrality,
         'action_strategy': ActionStrategy.myopic_greedy,
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     }
 
     # still need to clean plot (return ax, handle display externally)
-    # plot(game, **plot_args)
+    plot(game, **plot_args)
 
     # Replay the game
 
