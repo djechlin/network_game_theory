@@ -67,6 +67,8 @@ class Game:
             raise Exception("Not enough nodes to play a game where the action space is the set of nodes")
         elif self.rules.action_space is ActionSpace.boolean and len(self.graph.nodes()) < 1:
             raise Exception("Not enough nodes to play a game where the action space is the acceptance of a policy")
+        elif self.rules.action_space is ActionSpace.dynamic_edge and len(self.graph.nodes()) < 2:
+            raise Exception("Not enough nodes to play a game where the action space is dynamically computed")
 
         # Fetch players' actions
         actions = self.fetch_actions()

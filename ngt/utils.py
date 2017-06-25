@@ -37,7 +37,8 @@ def check_action_type(rules: Rules, action: Any):
     """
     if action is None:
         return True
-    elif rules.action_space == ActionSpace.edge \
+    elif (rules.action_space == ActionSpace.edge or \
+          rules.action_space == ActionSpace.dynamic_edge) \
         and (type(action) != tuple
              or len(action) != 2
              or type(action[0]) != int

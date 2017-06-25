@@ -10,6 +10,8 @@ class ActionSpace(Enum):
     edge = 1
     node = 2
     boolean = 3
+    # Denotes that the action space varies for different players for different time steps.
+    dynamic_edge = 4
 
 
 class Rules:

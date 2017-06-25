@@ -65,6 +65,8 @@ def random_random(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
         pass
     elif rules.action_space is ActionSpace.boolean:
         pass
+    elif rules.action_space is ActionSpace.dynamic_edge:
+        pass
 
 
 def random_egoist(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
@@ -102,6 +104,8 @@ def random_egoist(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
         pass
     elif rules.action_space is ActionSpace.boolean:
         pass
+    elif rules.action_space is ActionSpace.dynamic_edge:
+        pass
 
 
 def follower(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
@@ -124,6 +128,8 @@ def follower(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
     elif rules.action_space is ActionSpace.node:
         pass
     elif rules.action_space is ActionSpace.boolean:
+        pass
+    elif rules.action_space is ActionSpace.dynamic_edge:
         pass
 
 
@@ -176,6 +182,8 @@ def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, node_id: int
     elif rules.action_space is ActionSpace.node:
         pass
     elif rules.action_space is ActionSpace.boolean:
+        pass
+    elif rules.action_space is ActionSpace.dynamic_edge:
         pass
 
 
