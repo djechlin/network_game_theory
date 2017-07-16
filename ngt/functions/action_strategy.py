@@ -133,7 +133,7 @@ def follower(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
         pass
 
 
-def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, node_id: int = None) -> Any:
+def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, player_id: int = None) -> Any:
 
     if rules.action_space is ActionSpace.edge:
 
@@ -142,10 +142,10 @@ def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, node_id: int
 
         # if graph is empty, return random egoist
         if len(graph.edges()) == 0:
-            return random_egoist(rules, agent_state, node_id)
+            return random_egoist(rules, agent_state, player_id)
 
         # initialize the best current action
-        best_u, best_v, best_bet = 0, 0, utility(graph, node_id)
+        best_u, best_v, best_bet = 0, 0, utility(graph, player_id)
 
         # create the list of possible edges
         edges_combination = list(itertools.combinations(range(len(graph.nodes())), r=2))
@@ -158,7 +158,7 @@ def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, node_id: int
             if graph.has_edge(i, j) or graph.has_edge(j, i):
                 graph.remove_edge(i, j)
 
-                new_bet = utility(graph, node_id)
+                new_bet = utility(graph, player_id)
 
                 if new_bet > best_bet:
                     best_u, best_v, best_bet = i, j, new_bet
@@ -168,7 +168,7 @@ def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, node_id: int
             else:
                 graph.add_edge(i, j)
 
-                new_bet = utility(graph, node_id)
+                new_bet = utility(graph, player_id)
                 if new_bet > best_bet:
                     best_u, best_v, best_bet = i, j, new_bet
 
