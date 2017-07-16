@@ -17,6 +17,7 @@ from enum import Enum
 from ngt.utils import fetch_adequate_function, check_action_type, save_object, make_sure_path_exists
 from ngt.rules import ActionSpace
 
+from ngt.functions.action import Action
 from ngt.functions.action_strategy import ActionStrategy
 from ngt.functions.reaction_strategy import ReactionStrategy
 from ngt.functions.state_representation import StateRepresentation
@@ -64,7 +65,7 @@ class Player:
     def __str__(self):
         return self.profile.name
 
-    def compute_action(self, rules: Rules, history: History, player_id: int) -> Any:
+    def compute_action(self, rules: Rules, history: History, player_id: int) -> Action:
         """Compute the action chosen by the player given the history
 
         Args:
@@ -82,7 +83,7 @@ class Player:
 
         return agent_action
 
-    def compute_reaction(self, rules: Rules, actions: Actions, history: History, player_id: int) -> Any:
+    def compute_reaction(self, rules: Rules, actions: Actions, history: History, player_id: int) -> Action:
         """Compute the reaction chosen by the player given the actions of other players
 
         The concept of reaction is rarely raised but still useful in the network setting
@@ -105,7 +106,7 @@ class Player:
 
         return agent_reaction
 
-    def get_action(self, rules: Rules, agent_state: Any, player_id) -> Any:
+    def get_action(self, rules: Rules, agent_state: Any, player_id) -> Action:
         """Compute the action chosen by the player given his representation of the environment (Agent's state)
 
         Args:
@@ -127,7 +128,7 @@ class Player:
                 u = int(input("Enter the first node id of the edge you want to modify: "))
                 v = int(input("Enter the second node id of the edge you want to modify: "))
                 print("You decided to build/destroy (use has_edge to choose between create and destroy) the edge (" + str(u) + ", " + str(v) + ")")
-                return u, v
+                return EdgeAction(u, v)
 
             # should be handle by method plot, either automatic or pressing a key if you want plot to stay on screen
             # plt.close("all")
@@ -158,7 +159,7 @@ class Player:
         #     # should be handle by method plot, either automatic or pressing a key if you want plot to stay on screen
         #     plt.close("all")
         #
-        #     return u, v
+        #     return EdgeAction(u, v)
 
         return self.reaction_strategy(rules, actions, agent_state, player_id)
 

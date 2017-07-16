@@ -19,7 +19,7 @@ if __name__ == '__main__':
         'nb_players': 10,
         'nb_time_steps': 10,
         'action_space': ActionSpace.edge,
-        'impossible_action': set((0, 1)),
+        'impossible_action': set(EdgeAction(0, 1), EdgeAction(1, 0)),
         'graph': graph,
     }
 

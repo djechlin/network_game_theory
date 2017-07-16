@@ -139,9 +139,8 @@ class Game:
             Final actions that will indeed impact the environment
         """
         actions = {i: action
-                   for i, action
-                   in actions.items()
-                   if action not in self.rules.impossible_actions and action is not None}
+                   for i, action in actions.items() if not rules.impossible_action(action)
+                   and action is not None}
         return actions
 
     def update_environment(self, final_actions: Actions) -> None:

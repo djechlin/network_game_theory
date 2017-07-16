@@ -6,6 +6,8 @@ import random
 import itertools
 from typing import Tuple, Any
 from ngt.rules import Rules, ActionSpace
+from ngt.functions.action import Action
+from ngt.functions.action import EdgeAction
 from ngt.functions.utility import Utility
 
 from enum import Enum
@@ -30,7 +32,7 @@ def inactive(rules: Rules, agent_state: Any, node_id: int = None) -> None:
     return None
 
 
-def random_random(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
+def random_random(rules: Rules, agent_state: Any, node_id: int = None) -> Action:
     """Randomly pick an action (beware name conflict with random package)
 
     Args:
@@ -59,7 +61,7 @@ def random_random(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
         if u == v:
             return None
         else:
-            return u, v
+            return EdgeAction(u, v)
 
     elif rules.action_space is ActionSpace.node:
         pass
@@ -69,7 +71,7 @@ def random_random(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
         pass
 
 
-def random_egoist(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
+def random_egoist(rules: Rules, agent_state: Any, node_id: int = None) -> Action:
     """Randomly pick an action, with egoistic motivation (eg: edge creation with himself)
 
     It is assumed agents state is equal to the history, don't really know how to cleanly
@@ -98,7 +100,7 @@ def random_egoist(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
 
         u = random.choice(nodes)
 
-        return node_id, u
+        return EdgeAction(node_id, u)
 
     elif rules.action_space is ActionSpace.node:
         pass
@@ -108,7 +110,7 @@ def random_egoist(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
         pass
 
 
-def follower(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
+def follower(rules: Rules, agent_state: Any, node_id: int = None) -> Action:
 
     if rules.action_space is ActionSpace.edge:
 
@@ -121,7 +123,7 @@ def follower(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
 
         for i in range(len(inverse)):
             if not graph.has_edge(node_id, inverse[i][1]):
-                return node_id, inverse[i][1]
+                return EdgeAction(node_id, inverse[i][1])
 
         return None
 
@@ -133,7 +135,7 @@ def follower(rules: Rules, agent_state: Any, node_id: int = None) -> Any:
         pass
 
 
-def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, player_id: int = None) -> Any:
+def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, player_id: int = None) -> Action:
 
     if rules.action_space is ActionSpace.edge:
 
@@ -147,37 +149,23 @@ def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, player_id: i
         # initialize the best current action
         best_u, best_v, best_bet = 0, 0, utility(graph, player_id)
 
-        # create the list of possible edges
-        edges_combination = list(itertools.combinations(range(len(graph.nodes())), r=2))
+        # create the list of available actions
+        actions = action.all_edges(graph.nodes())
 
         # iterate through all possible action and keep track of the best choice
-        for i, j in edges_combination:
-            if (i, j) in rules.impossible_actions or (j, i) in rules.impossible_actions:
-                continue
-
-            if graph.has_edge(i, j) or graph.has_edge(j, i):
-                graph.remove_edge(i, j)
-
+        for action in actions:
+            if not rules.is_impossible(action):
+                action.do(graph)
                 new_bet = utility(graph, player_id)
 
                 if new_bet > best_bet:
                     best_u, best_v, best_bet = i, j, new_bet
-
-                graph.add_edge(i, j)
-
-            else:
-                graph.add_edge(i, j)
-
-                new_bet = utility(graph, player_id)
-                if new_bet > best_bet:
-                    best_u, best_v, best_bet = i, j, new_bet
-
-                graph.remove_edge(i, j)
+                action.undo(graph)
 
         if best_u == best_v:
             return None
         else:
-            return best_u, best_v
+            return EdgeAction(best_u, best_v)
 
     elif rules.action_space is ActionSpace.node:
         pass
