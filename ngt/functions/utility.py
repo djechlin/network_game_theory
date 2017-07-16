@@ -12,6 +12,9 @@ Utility based on micro measures
 
 
 def betweenness_centrality(graph: Graph, node_id: int) -> float:
+    # Bias players to prefer being connected to anything over nothing
+    if graph.degree(node_id) == 0:
+        return -.0001
     return nx.betweenness_centrality(graph)[node_id]
 
 

@@ -72,7 +72,8 @@ class Game:
 
         # Fetch players' actions
         actions = self.fetch_actions()
-
+        print(actions)
+        
         # Fetch players' reactions
         reactions = self.fetch_reactions(actions)
 
@@ -93,6 +94,7 @@ class Game:
             None
         """
         while self.current_time_step < self.rules.nb_time_steps:
+            print("Round %d" % self.current_time_step)
             self.play_round()
 
     def fetch_actions(self) -> Actions:
@@ -105,6 +107,7 @@ class Game:
 
         for player_id, player in self.players.items():
             action = player.compute_action(self.rules, self.history, player_id)
+            print(action)
             action_is_valid = check_action_type(self.rules, action)
             if action_is_valid:
                 actions[player_id] = action

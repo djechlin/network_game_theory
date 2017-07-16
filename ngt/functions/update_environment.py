@@ -16,3 +16,4 @@ def update_environment_edge(rules: Rules, graph: Graph, final_actions: Actions) 
     return None
 
 update_environment_functions[ActionSpace.edge] = update_environment_edge
+update_environment_functions[ActionSpace.dynamic_edge] = update_environment_edge
