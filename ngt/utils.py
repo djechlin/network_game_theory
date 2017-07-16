@@ -1,6 +1,8 @@
 from typing import Dict, List, Set, Tuple, Any, Callable
 from ngt.rules import Rules, ActionSpace
 
+from ngt.functions.action import Action
+
 import pickle
 import os
 import errno
@@ -38,12 +40,8 @@ def check_action_type(rules: Rules, action: Any):
     if action is None:
         return True
     elif (rules.action_space == ActionSpace.edge or \
-          rules.action_space == ActionSpace.dynamic_edge) \
-        and (type(action) != tuple
-             or len(action) != 2
-             or type(action[0]) != int
-             or type(action[1]) != int):
-        return False
+          rules.action_space == ActionSpace.dynamic_edge):
+        return isinstance(action, Action)
     elif rules.action_space == ActionSpace.node and (type(action) != int):
         return False
     elif rules.action_space == ActionSpace.boolean and (type(action) != bool):

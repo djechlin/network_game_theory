@@ -139,7 +139,7 @@ class Game:
             Final actions that will indeed impact the environment
         """
         actions = {i: action
-                   for i, action in actions.items() if not rules.impossible_action(action)
+                   for i, action in actions.items() if not self.rules.is_impossible(action)
                    and action is not None}
         return actions
 

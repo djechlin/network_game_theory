@@ -6,6 +6,12 @@ Instances of those classes define the action space, the number of players and nu
 from enum import Enum
 
 
+class ActionSpace(Enum):
+    edge = 1
+    node = 2
+    boolean = 3
+    dynamic_edge = 4
+
 class Rules:
     def __init__(self, **kwargs):
         self.nb_players = kwargs.get('nb_players', 10)

@@ -6,6 +6,7 @@ from ngt.player import Player, EntityType
 from ngt.plot import plot
 
 from ngt.functions.utility import Utility
+from ngt.functions.action import EdgeAction
 from ngt.functions.action_strategy import ActionStrategy
 
 if __name__ == '__main__':
@@ -19,7 +20,7 @@ if __name__ == '__main__':
         'nb_players': 10,
         'nb_time_steps': 10,
         'action_space': ActionSpace.edge,
-        'impossible_action': set(EdgeAction(0, 1), EdgeAction(1, 0)),
+        'impossible_action': set((EdgeAction(0, 1), EdgeAction(1, 0))),
         'graph': graph,
     }
 

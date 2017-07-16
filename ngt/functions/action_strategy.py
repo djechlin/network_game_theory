@@ -8,6 +8,7 @@ from typing import Tuple, Any
 from ngt.rules import Rules, ActionSpace
 from ngt.functions.action import Action
 from ngt.functions.action import EdgeAction
+from ngt.functions.generate_actions import all_edges
 from ngt.functions.utility import Utility
 
 from enum import Enum
@@ -137,7 +138,7 @@ def follower(rules: Rules, agent_state: Any, node_id: int = None) -> Action:
 
 def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, player_id: int = None) -> Action:
 
-    if rules.action_space is in (ActionSpace.edge, ActionSpace.dynamic_edge):
+    if rules.action_space in (ActionSpace.edge, ActionSpace.dynamic_edge):
 
         # myopic, keep only last graph from history
         graph = agent_state[len(agent_state) - 1].graph
@@ -147,11 +148,11 @@ def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, player_id: i
             return random_egoist(rules, agent_state, player_id)
 
         # initialize the best current action
-        best_u, best_v, best_bet = 0, 0, utility(graph, player_id)
+        best_action, best_bet = None, utility(graph, player_id)
 
         # create the list of available actions
         if rules.action_space is ActionSpace.edge:
-            actions = action.all_edges(graph.nodes())
+            actions = all_edges(graph.nodes())
         else:
             actions = rules.generate_dynamic_actions(player_id)
 
@@ -162,13 +163,10 @@ def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, player_id: i
                 new_bet = utility(graph, player_id)
 
                 if new_bet > best_bet:
-                    best_u, best_v, best_bet = i, j, new_bet
+                    best_action, best_bet = action, new_bet
                 action.undo(graph)
 
-        if best_u == best_v:
-            return None
-        else:
-            return EdgeAction(best_u, best_v)
+        return best_action
 
     elif rules.action_space is ActionSpace.node:
         pass
