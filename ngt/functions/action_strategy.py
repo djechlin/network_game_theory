@@ -137,7 +137,7 @@ def follower(rules: Rules, agent_state: Any, node_id: int = None) -> Action:
 
 def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, player_id: int = None) -> Action:
 
-    if rules.action_space is ActionSpace.edge:
+    if rules.action_space is in (ActionSpace.edge, ActionSpace.dynamic_edge):
 
         # myopic, keep only last graph from history
         graph = agent_state[len(agent_state) - 1].graph
@@ -150,7 +150,10 @@ def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, player_id: i
         best_u, best_v, best_bet = 0, 0, utility(graph, player_id)
 
         # create the list of available actions
-        actions = action.all_edges(graph.nodes())
+        if rules.action_space is ActionSpace.edge:
+            actions = action.all_edges(graph.nodes())
+        else:
+            actions = rules.generate_dynamic_actions(player_id)
 
         # iterate through all possible action and keep track of the best choice
         for action in actions:
@@ -170,8 +173,6 @@ def myopic_greedy(rules: Rules, agent_state: Any, utility: Utility, player_id: i
     elif rules.action_space is ActionSpace.node:
         pass
     elif rules.action_space is ActionSpace.boolean:
-        pass
-    elif rules.action_space is ActionSpace.dynamic_edge:
         pass
 
 
