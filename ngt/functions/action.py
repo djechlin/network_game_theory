@@ -3,15 +3,20 @@ Methods related to defining available actions for dynamic strategies
 """
 import networkx as nx
 
+# Interface that represents an action. An action is performed on a graph, and the player presumably
+# would compare their utility before and after applying the action. The 'do' method performs the
+# action on the graph. The 'undo' method reverts it. Calling 'do' then 'undo' leaves the graph
+# in the original state. After 'do' is called one frame of information to 'undo' is stored.
+# If 'do' is called twice in a row, the information for the first 'undo' is discarded.
 class Action:
-    def do(self):
+    def do(self, graph):
         pass
 
 
-    def undo(self):
+    def undo(self, graph):
         pass
 
-
+# Action that represents toggling one edge.
 class EdgeAction(Action):
 
     def __init__(self, i, j):
@@ -27,6 +32,8 @@ class EdgeAction(Action):
     def __repr__(self):
         return 'EdgeAction(i=%d,j=%d)' % (self.i, self.j)
 
+
+# Action that represents toggling two edges. Both edges must be toggled.
 class DoubleEdgeAction(Action):
 
     def __init__(self, i1, j1, i2, j2):
@@ -49,13 +56,15 @@ class DoubleEdgeAction(Action):
         toggle_edge_(graph, self.i2, self.j2)
 
 
+# Action that represents removing all connections from its node.
 class AssassinationAction(Action):
 
     def __init__(self, i):
-        self.neighbors = []
         self.i = i
 
     def do(self, graph):
+        # Initialize neighbors each time 'do' is called.
+        self.neighbors = []
         for n in graph.neighbors(self.i):
             self.neighbors.append(n)
             graph.remove_edge(self.i, n)
@@ -66,19 +75,6 @@ class AssassinationAction(Action):
 
     def __repr__(self):
         return 'AssassinationAction(i=%d)' % (self.i,)
-
-
-def all_edges(node_list):
-    return [EdgeAction(i, j) for i, j in itertools.product(node_list, repeat=2) if i != j]
-
-
-def all_double_edges(node_list):
-    return [DoubleEdgeAction(i1, j1, i2, j2) for i1, j1, i2, j2
-            in itertools.product(node_list, repeat=4)
-            if i1 != j1 and i2 != j2 and set([i1, j1]) != set([i2, j2])]
-
-def all_assassinations(node_list):
-    return [AssassinationAction(i) for i in node_list]
 
 
 def toggle_edge_(graph, i, j):
