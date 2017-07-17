@@ -8,20 +8,34 @@ from ngt.plot import plot
 from ngt.functions.utility import Utility
 from ngt.functions.action import EdgeAction
 from ngt.functions.action_strategy import ActionStrategy
+from ngt.functions.generate_actions import all_assassinations
+from ngt.functions.generate_actions import all_double_edges
+from ngt.functions.generate_actions import generate_with_bonus
+
+
+def generate_double_edge_versus_assassin(player_id):
+    # Configure these values for different experiments.
+    double_edge_bonus_rate = 0.1
+    assassination_bonus_rate = 0.05
+
+    if player_id == 0:
+        return generate_with_bonus(20, 5, all_double_edges, double_edge_bonus_rate)
+    elif player_id == 1:
+        return generate_with_bonus(20, 5, all_assassinations, assassination_bonus_rate)
 
 if __name__ == '__main__':
 
     # Create the game
 
     graph = nx.Graph()
-    graph.add_nodes_from(list(range(10)))
+    graph.add_nodes_from(list(range(20)))
 
     game_info = {
-        'nb_players': 10,
-        'nb_time_steps': 10,
-        'action_space': ActionSpace.edge,
-        'impossible_action': set((EdgeAction(0, 1), EdgeAction(1, 0))),
-        'graph': graph,
+        'nb_players': 2,
+        'nb_time_steps': 200,
+        'action_space': ActionSpace.dynamic_edge,
+        'generate_dynamic_actions': generate_double_edge_versus_assassin,
+        'graph': graph
     }
 
     game = Game(**game_info)
